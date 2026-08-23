@@ -28,6 +28,15 @@
                 </div>
             {% endif %}
 
+            {% if no_barbers_available %}
+                <div class="booking-card" style="text-align: center; padding: 60px 30px;">
+                    <i class="fa-solid fa-user-clock" style="font-size: 3rem; color: var(--gold, #d4af37); margin-bottom: 20px; display: block;"></i>
+                    <h3 style="margin-bottom: 10px; color: #fff;">No Barbers Currently Available</h3>
+                    <p style="color: #999; max-width: 400px; margin: 0 auto;">No barbers are currently available. Please visit again soon.</p>
+                    <a href="{% url 'home' %}" class="button button-ghost" style="margin-top: 24px; display: inline-flex;"><i class="fa-solid fa-house"></i> Back to Home</a>
+                </div>
+            {% else %}
+
             <div class="booking-card">
                 
                 <form method="POST" enctype="multipart/form-data" id="bookingForm">
@@ -142,6 +151,9 @@
                     </button>
                 </form>
             </div>
+
+            {% endif %}
+
         </div>
     </main>
 

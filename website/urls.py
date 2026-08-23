@@ -25,5 +25,8 @@ urlpatterns = [
     path("dashboard/gallery/", views.dashboard_gallery, name="dashboard_gallery"),
     path("dashboard/gallery/delete/<int:pk>/", views.dashboard_gallery_delete, name="dashboard_gallery_delete"),
     path("dashboard/shop/", views.dashboard_shop_info, name="dashboard_shop_info"),
+    path("dashboard/barbers/", views.dashboard_barbers, name="dashboard_barbers"),
+    path("dashboard/barbers/delete/<int:pk>/", views.dashboard_barber_delete, name="dashboard_barber_delete"),
+    path("dashboard/barbers/<int:pk>/toggle-availability/", views.dashboard_barber_toggle_availability, name="dashboard_barber_toggle_availability"),
     
 ]

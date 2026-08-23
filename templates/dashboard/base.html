@@ -1303,6 +1303,10 @@
                 class="{% if request.resolver_match.url_name == 'dashboard_services' %}active{% endif %}">
                 <i class="fa-solid fa-scissors"></i> Services
             </a>
+            <a href="{% url 'dashboard_barbers' %}"
+                class="{% if request.resolver_match.url_name == 'dashboard_barbers' %}active{% endif %}">
+                <i class="fa-solid fa-user-tie"></i> Barbers
+            </a>
             <a href="{% url 'dashboard_gallery' %}"
                 class="{% if request.resolver_match.url_name == 'dashboard_gallery' %}active{% endif %}">
                 <i class="fa-solid fa-images"></i> Gallery

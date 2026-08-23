@@ -17,7 +17,6 @@
                 <thead>
                     <tr>
                         <th>Service Name</th>
-                        <th>Price (ETB)</th>
                         <th>Duration</th>
                         <th>Description</th>
                         <th>Actions</th>
@@ -27,7 +26,6 @@
                     {% for s in services %}
                         <tr>
                             <td data-label="Service Name"><strong>{{ s.name }}</strong></td>
-                            <td data-label="Price"><strong style="color: var(--accent-gold);">{{ s.price }} ETB</strong></td>
                             <td data-label="Duration"><span style="color: var(--text-muted);"><i class="fa-regular fa-clock"></i> {{ s.duration }} mins</span></td>
                             <td data-label="Description"><small style="color: var(--text-muted);">{{ s.description|truncatewords:10 }}</small></td>
                             <td data-label="Actions">
@@ -46,7 +44,7 @@
                         </tr>
                     {% empty %}
                         <tr>
-                            <td colspan="5" class="empty-cell">
+                            <td colspan="4" class="empty-cell">
                                 No services found. Use the form to add services.
                             </td>
                         </tr>
@@ -62,7 +60,6 @@
                     <div class="m-card">
                         <div class="m-card-header">
                             <span class="m-card-title"><i class="fa-solid fa-scissors" style="color: var(--accent-gold);"></i> {{ s.name }}</span>
-                            <strong style="color: var(--accent-gold);">{{ s.price }} ETB</strong>
                         </div>
                         <div class="m-card-body">
                             <div class="m-card-row">
@@ -111,15 +108,10 @@
                 {{ form.name }}
             </div>
 
-            <div class="dash-form-row">
-                <div>
-                    <label class="dash-form-label">Price (ETB) *</label>
-                    {{ form.price }}
-                </div>
-                <div>
-                    <label class="dash-form-label">Duration (Mins) *</label>
-                    {{ form.duration }}
-                </div>
+            <input type="hidden" name="price" value="{{ form.price.value|default:'0' }}">
+            <div class="dash-form-group">
+                <label class="dash-form-label">Duration (Mins) *</label>
+                {{ form.duration }}
             </div>
 
             <div class="dash-form-group">

@@ -39,7 +39,7 @@ def home(request):
     shop = ShopInfo.objects.first()
     services = Service.objects.all()
     gallery = GalleryImage.objects.all()
-    barbers = Barber.objects.all()
+    barbers = Barber.objects.filter(is_available=True)
     testimonials = Testimonial.objects.all().order_by("-id")
 
     if request.method == "POST":
@@ -112,7 +112,7 @@ def available_slots_api(request):
 def booking_create(request):
     shop = ShopInfo.objects.first()
     services = Service.objects.all()
-    barbers = Barber.objects.all()
+    barbers = Barber.objects.filter(is_available=True)
     today = date.today()
     max_date = today + timedelta(days=3)
 
@@ -165,11 +165,14 @@ def booking_create(request):
 
         form = BookingForm(initial=initial_data)
 
+    no_barbers_available = not barbers.exists()
+
     context = {
         "form": form,
         "shop": shop,
         "services": services,
         "barbers": barbers,
+        "no_barbers_available": no_barbers_available,
         "today": today.strftime("%Y-%m-%d"),
         "max_date": max_date.strftime("%Y-%m-%d"),
     }
@@ -613,3 +616,59 @@ def dashboard_shop_info(request):
         form = ShopInfoForm(instance=shop) if shop else ShopInfoForm()
 
     return render(request, "dashboard/shop_info.html", {"form": form, "shop": shop})
+
+
+@login_required
+@user_passes_test(is_staff_user)
+def dashboard_barbers(request):
+    barbers = Barber.objects.all()
+    edit_id = request.GET.get("edit")
+    editing_barber = None
+
+    if edit_id and edit_id.isdigit():
+        editing_barber = get_object_or_404(Barber, pk=int(edit_id))
+
+    if request.method == "POST":
+        if editing_barber:
+            form = BarberForm(request.POST, request.FILES, instance=editing_barber)
+        else:
+            form = BarberForm(request.POST, request.FILES)
+
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Barber saved successfully!")
+            return redirect("dashboard_barbers")
+    else:
+        form = BarberForm(instance=editing_barber) if editing_barber else BarberForm()
+
+    context = {
+        "barbers": barbers,
+        "form": form,
+        "editing_barber": editing_barber,
+    }
+    return render(request, "dashboard/barbers.html", context)
+
+
+@login_required
+@user_passes_test(is_staff_user)
+def dashboard_barber_delete(request, pk):
+    barber = get_object_or_404(Barber, pk=pk)
+    if request.method == "POST":
+        try:
+            barber.delete()
+            messages.success(request, "Barber deleted successfully.")
+        except Exception:
+            messages.error(request, "Cannot delete barber because existing bookings reference them.")
+    return redirect("dashboard_barbers")
+
+
+@login_required
+@user_passes_test(is_staff_user)
+def dashboard_barber_toggle_availability(request, pk):
+    barber = get_object_or_404(Barber, pk=pk)
+    if request.method == "POST":
+        barber.is_available = not barber.is_available
+        barber.save(update_fields=["is_available"])
+        status = "available" if barber.is_available else "unavailable"
+        messages.success(request, f"{barber.name} is now {status}.")
+    return redirect("dashboard_barbers")

@@ -39,6 +39,10 @@ class BookingForm(forms.ModelForm):
             "notes": forms.Textarea(attrs={"class": "form-control", "rows": 2, "placeholder": "Any special instructions or preferences (optional)"}),
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["barber"].queryset = Barber.objects.filter(is_available=True)
+
     def clean_appointment_date(self):
         appt_date = self.cleaned_data.get("appointment_date")
         today = date.today()

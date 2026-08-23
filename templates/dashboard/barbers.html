@@ -1,0 +1,178 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Barber Management — Barber Dashboard{% endblock %}
+{% block header_title %}Barber Management{% endblock %}
+
+{% block content %}
+
+<div class="dash-grid-2-1">
+
+    <!-- BARBERS LIST -->
+    <div class="dashboard-card">
+        <h3 style="margin-bottom: 18px; font-size: 1.05rem; color: #fff;">Team Members</h3>
+
+        <!-- DESKTOP TABLE VIEW -->
+        <div class="table-responsive desktop-only">
+            <table class="dash-table">
+                <thead>
+                    <tr>
+                        <th>Barber</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for b in barbers %}
+                        <tr>
+                            <td data-label="Barber">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    {% if b.photo %}
+                                        <img src="{{ b.photo.url }}" alt="{{ b.name }}" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border-color);">
+                                    {% else %}
+                                        <div style="width: 36px; height: 36px; border-radius: 50%; background: var(--border-color); display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 0.85rem;"><i class="fa-solid fa-user"></i></div>
+                                    {% endif %}
+                                    <strong>{{ b.name }}</strong>
+                                </div>
+                            </td>
+                            <td data-label="Role"><span style="color: var(--text-muted);">{{ b.role }}</span></td>
+                            <td data-label="Status">
+                                <form method="POST" action="{% url 'dashboard_barber_toggle_availability' b.id %}" style="display: inline;">
+                                    {% csrf_token %}
+                                    {% if b.is_available %}
+                                        <button type="submit" class="btn btn-sm" style="background: rgba(42, 157, 143, 0.15); color: var(--success); border: 1px solid rgba(42, 157, 143, 0.3); cursor: pointer; font-size: 0.8rem; padding: 5px 12px; border-radius: 6px;">
+                                            <i class="fa-solid fa-circle" style="font-size: 0.5rem; vertical-align: middle;"></i> Available
+                                        </button>
+                                    {% else %}
+                                        <button type="submit" class="btn btn-sm" style="background: rgba(230, 57, 70, 0.15); color: var(--danger); border: 1px solid rgba(230, 57, 70, 0.3); cursor: pointer; font-size: 0.8rem; padding: 5px 12px; border-radius: 6px;">
+                                            <i class="fa-solid fa-circle" style="font-size: 0.5rem; vertical-align: middle;"></i> Unavailable
+                                        </button>
+                                    {% endif %}
+                                </form>
+                            </td>
+                            <td data-label="Actions">
+                                <div style="display: flex; gap: 6px;">
+                                    <a href="?edit={{ b.id }}" class="btn btn-secondary btn-sm">
+                                        <i class="fa-solid fa-pen"></i> Edit
+                                    </a>
+                                    <form method="POST" action="{% url 'dashboard_barber_delete' b.id %}" onsubmit="return confirm('Are you sure you want to delete this barber?');" style="display: inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-danger btn-sm">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="4" class="empty-cell">
+                                No barbers found. Use the form to add barbers.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- MOBILE CARD LIST -->
+        <div class="mobile-only">
+            <div class="m-card-list">
+                {% for b in barbers %}
+                    <div class="m-card">
+                        <div class="m-card-header">
+                            <span class="m-card-title">
+                                {% if b.photo %}
+                                    <img src="{{ b.photo.url }}" alt="{{ b.name }}" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover; vertical-align: middle; margin-right: 6px;">
+                                {% endif %}
+                                {{ b.name }}
+                            </span>
+                            <form method="POST" action="{% url 'dashboard_barber_toggle_availability' b.id %}" style="display: inline;">
+                                {% csrf_token %}
+                                {% if b.is_available %}
+                                    <button type="submit" class="btn btn-sm" style="background: rgba(42, 157, 143, 0.15); color: var(--success); border: 1px solid rgba(42, 157, 143, 0.3); cursor: pointer; font-size: 0.75rem; padding: 4px 10px; border-radius: 6px;">
+                                        <i class="fa-solid fa-circle" style="font-size: 0.45rem; vertical-align: middle;"></i> Available
+                                    </button>
+                                {% else %}
+                                    <button type="submit" class="btn btn-sm" style="background: rgba(230, 57, 70, 0.15); color: var(--danger); border: 1px solid rgba(230, 57, 70, 0.3); cursor: pointer; font-size: 0.75rem; padding: 4px 10px; border-radius: 6px;">
+                                        <i class="fa-solid fa-circle" style="font-size: 0.45rem; vertical-align: middle;"></i> Unavailable
+                                    </button>
+                                {% endif %}
+                            </form>
+                        </div>
+                        <div class="m-card-body">
+                            <div class="m-card-row">
+                                <span class="m-card-label">Role</span>
+                                <span class="m-card-val">{{ b.role }}</span>
+                            </div>
+                            {% if b.bio %}
+                                <div class="m-card-row">
+                                    <span class="m-card-label">Bio</span>
+                                    <span class="m-card-val" style="color: var(--text-muted);">{{ b.bio|truncatewords:15 }}</span>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="m-card-actions">
+                            <a href="?edit={{ b.id }}" class="btn btn-secondary btn-sm">
+                                <i class="fa-solid fa-pen"></i> Edit Barber
+                            </a>
+                            <form method="POST" action="{% url 'dashboard_barber_delete' b.id %}" onsubmit="return confirm('Are you sure you want to delete this barber?');" style="display: inline; flex: 1;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-sm" style="width: 100%; justify-content: center;">
+                                    <i class="fa-solid fa-trash"></i> Delete
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="empty-cell">
+                        No barbers found. Use the form to add barbers.
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- ADD / EDIT BARBER FORM -->
+    <div class="dashboard-card">
+        <h3 style="margin-bottom: 18px; font-size: 1.05rem; color: #fff;">
+            {% if editing_barber %}Edit Barber{% else %}Add New Barber{% endif %}
+        </h3>
+
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="dash-form-group">
+                <label class="dash-form-label">Barber Name *</label>
+                {{ form.name }}
+            </div>
+
+            <div class="dash-form-group">
+                <label class="dash-form-label">Role *</label>
+                {{ form.role }}
+            </div>
+
+            <div class="dash-form-group">
+                <label class="dash-form-label">Photo</label>
+                {{ form.photo }}
+            </div>
+
+            <div class="dash-form-group">
+                <label class="dash-form-label">Bio</label>
+                {{ form.bio }}
+            </div>
+
+            <div style="display: flex; gap: 8px; margin-top: 6px;">
+                <button type="submit" class="btn btn-gold" style="flex: 1; padding: 12px; justify-content: center;">
+                    <i class="fa-solid fa-save"></i> Save Barber
+                </button>
+                {% if editing_barber %}
+                    <a href="{% url 'dashboard_barbers' %}" class="btn btn-secondary" style="padding: 12px;">Cancel</a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+</div>
+
+{% endblock %}

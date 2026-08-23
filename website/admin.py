@@ -31,7 +31,7 @@ class TestimonialAdmin(admin.ModelAdmin):
 
 @admin.register(Barber)
 class BarberAdmin(admin.ModelAdmin):
-    list_display = ("name", "role")
+    list_display = ("name", "role", "is_available")
 
 
 @admin.register(Booking)

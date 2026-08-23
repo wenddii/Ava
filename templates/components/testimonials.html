@@ -11,9 +11,9 @@
                 <article class="testimonial-card reveal" {% if forloop.counter0 > 0 %}data-delay="{{ forloop.counter0 }}00"{% endif %}>
                     <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
                         {% if testimonial.image %}
-                            <img src="{{ testimonial.image.url }}" alt="{{ testimonial.customer_name }}" style="width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 2px solid #d4af37;">
+                            <img src="{{ testimonial.image.url }}" alt="{{ testimonial.customer_name }}" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid #d4af37;">
                         {% else %}
-                            <div style="width: 52px; height: 52px; border-radius: 50%; background: #262933; color: #d4af37; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.2rem; border: 2px solid #3a3d48;">
+                            <div style="width: 80px; height: 80px; border-radius: 50%; background: #262933; color: #d4af37; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.2rem; border: 2px solid #3a3d48;">
                                 {{ testimonial.customer_name|slice:":1"|upper }}
                             </div>
                         {% endif %}

@@ -24,7 +24,7 @@ class Service(models.Model):
     duration = models.PositiveIntegerField(default=30, help_text="Duration in minutes")
 
     def __str__(self):
-        return f"{self.name} ({self.duration} mins - {self.price} ETB)"
+        return f"{self.name} ({self.duration} mins)"
 
 
 class GalleryImage(models.Model):
@@ -61,6 +61,7 @@ class Barber(models.Model):
     role = models.CharField(max_length=100)
     photo = models.ImageField(upload_to="paradise_barber/barbers/", blank=True, null=True)
     bio = models.TextField(blank=True)
+    is_available = models.BooleanField(default=True)
 
     def __str__(self):
         return self.name
