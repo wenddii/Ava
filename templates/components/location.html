@@ -73,8 +73,8 @@
                 </div>
 
                 <div class="location-card-actions">
-                    <a href="https://maps.google.com/?q={{ shop.location|default:'Bole+Addis+Ababa'|urlencode }}"
-                        target="_blank" rel="noopener noreferrer" class="button button-primary button-full"
+                    <a href="{{ shop.location|default:'#' }}" target="_blank" rel="noopener noreferrer"
+                        class="button button-primary button-full"
                         aria-label="Get Directions to Ava's Glow Studio on Google Maps">
                         <i class="fa-solid fa-diamond-turn-right"></i> Get Directions
                     </a>

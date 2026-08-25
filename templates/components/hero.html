@@ -1,60 +1,31 @@
 {% load static %}
 
-<section class="hero section-pad" style="background-image: url('{% static 'images/hero.jpg' %}');">
-    <div class="hero-halo"></div>
-    <div class="container hero-grid hero-grid-minimal">
-        <div class="hero-copy reveal">
+<section class="hero" style="background-image: url('{% static 'images/hero.jpg' %}');">
+    <div class="container hero-container">
+        <div class="hero-content reveal">
             <span class="eyebrow eyebrow-gold">
-                <i class="fa-solid fa-sparkles"></i> Luxury Beauty &amp; Wellness Studio
+                <i class="fa-solid fa-sparkles"></i> Women's Luxury Beauty Salon
             </span>
             
-            <h1>Radiate Confidence &amp;<br><em>Timeless Beauty</em></h1>
+            <h1 class="hero-title">Ava's Glow Studio</h1>
             
             <p class="hero-lead">
-                Bespoke hair artistry, radiant skincare treatments, and luxury self-care crafted for your natural glow.
+                A luxury sanctuary of bespoke hair artistry, radiant skincare, and personalized beauty care.
             </p>
 
             <div class="hero-actions">
                 <a class="button button-primary hero-btn-main" href="{% url 'booking' %}">
-                    <i class="fa-solid fa-calendar-check"></i> Book Your Session
+                    <i class="fa-solid fa-calendar-check"></i> Book Now
                 </a>
-                <a class="button button-ghost" href="#services">
-                    <i class="fa-solid fa-spa"></i> Explore Treatments
+                <a class="button button-ghost" href="#location">
+                    <i class="fa-solid fa-location-dot"></i> Get Location
                 </a>
             </div>
         </div>
     </div>
 
     <div class="hero-scroll">
-        <span>Discover</span>
+        <span>Explore</span>
         <div class="hero-scroll-line"></div>
     </div>
 </section>
-
-<!-- STATS BANNER -->
-<section class="stats-banner">
-    <div class="container">
-        <div class="stats-grid">
-            <div class="stat-item reveal">
-                <span class="stat-number" data-count="500">500</span>
-                <span class="stat-label">Happy Clients</span>
-            </div>
-            <div class="stat-item reveal" data-delay="100">
-                <span class="stat-number" data-count="5">5</span>
-                <span class="stat-label">Years of Artistry</span>
-            </div>
-            <div class="stat-item reveal" data-delay="200">
-                <span class="stat-number" data-count="4.9" data-decimals="1">4.9</span>
-                <span class="stat-label">Star Experience</span>
-            </div>
-            <div class="stat-item reveal" data-delay="300">
-                <span class="stat-number" data-count="100">100</span>
-                <span class="stat-label">% Tailored Care</span>
-            </div>
-        </div>
-    </div>
-</section>
-
-<div class="section-divider reveal" id="about">
-    <i class="fa-solid fa-spa"></i>
-</div>
