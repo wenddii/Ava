@@ -1,18 +1,18 @@
 <section class="section-pad contact-section" id="contact">
     <div class="container contact-grid">
         <div class="section-heading left-align reveal-left">
-            <span class="eyebrow"><i class="fa-solid fa-phone"></i> Get in Touch</span>
-            <h2>Have Questions? Reach Out</h2>
-            <p>Send us a message or schedule your next cut directly using our online booking system.</p>
+            <span class="eyebrow"><i class="fa-solid fa-envelope-open-text"></i> Connect With Us</span>
+            <h2>We’d love to welcome you.</h2>
+            <p>Have questions regarding treatments or special bridal packages? Send us a note or reserve your appointment directly.</p>
 
             <div class="contact-details reveal" data-delay="100">
-                <a class="contact-link" href="tel:{{ shop.phone_number }}"><i class="fa-solid fa-phone"></i> {{ shop.phone_number|default:"Call now" }}</a>
+                <a class="contact-link" href="tel:{{ shop.phone_number }}"><i class="fa-solid fa-phone"></i> {{ shop.phone_number|default:"+251 911 000 000" }}</a>
                 <p class="contact-meta"><i class="fa-solid fa-location-dot"></i> {{ shop.location|default:"Addis Ababa, Ethiopia" }}</p>
-                <p class="contact-meta"><i class="fa-solid fa-clock"></i> {{ shop.opening_hours|default:"Open for scheduled appointments" }}</p>
+                <p class="contact-meta"><i class="fa-solid fa-clock"></i> {{ shop.opening_hours|default:"Mon - Sat: 09:00 AM - 08:00 PM" }}</p>
             </div>
 
-            <div style="margin-top: 25px;">
-                <a href="{% url 'booking' %}" class="button button-primary"><i class="fa-solid fa-calendar-check"></i> Book Online Appointment</a>
+            <div style="margin-top: 28px;">
+                <a href="{% url 'booking' %}" class="button button-primary"><i class="fa-solid fa-calendar-check"></i> Book Your Appointment</a>
             </div>
         </div>
 
@@ -20,7 +20,9 @@
             <form method="POST" action="{% url 'home' %}#contact" class="contact-form">
                 {% csrf_token %}
                 {{ form.as_p }}
-                <button type="submit" class="button button-primary button-full">Send Message</button>
+                <button type="submit" class="button button-primary button-full">
+                    <i class="fa-solid fa-paper-plane"></i> Send Inquiries
+                </button>
             </form>
         </div>
     </div>

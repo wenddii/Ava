@@ -3,23 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Barber Staff Login — Africa Barber Shop</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Studio Staff Login — Ava's GLOW STUDIO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Allura&family=Playfair+Display:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous">
     
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            background-color: #0f1115;
-            color: #f0f2f5;
-            font-family: 'Inter', system-ui, sans-serif;
+            background-color: #FAF7F2;
+            color: #222E23;
+            font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
             display: flex;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            padding: 1rem;
+            padding: 1.5rem;
             -webkit-font-smoothing: antialiased;
+            position: relative;
+            overflow: hidden;
         }
 
         /* Ambient glow */
@@ -29,32 +31,45 @@
             top: -10rem;
             left: 50%;
             transform: translateX(-50%);
-            width: 30rem;
-            height: 30rem;
+            width: 35rem;
+            height: 35rem;
             border-radius: 50%;
-            background: radial-gradient(circle, rgba(212, 175, 55, 0.06), transparent 65%);
+            background: radial-gradient(circle, rgba(194, 162, 119, 0.18), transparent 65%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            bottom: -8rem;
+            right: 10%;
+            width: 25rem;
+            height: 25rem;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(100, 127, 96, 0.12), transparent 65%);
             pointer-events: none;
             z-index: 0;
         }
 
         .login-card {
-            background: #161920;
-            border: 1px solid #262933;
-            border-radius: 16px;
-            padding: clamp(28px, 5vw, 44px);
+            background: #FFFFFF;
+            border: 1px solid rgba(100, 127, 96, 0.18);
+            border-radius: 24px;
+            padding: clamp(32px, 5vw, 48px);
             width: 100%;
-            max-width: 420px;
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+            max-width: 440px;
+            box-shadow: 0 20px 50px rgba(34, 46, 35, 0.08);
             text-align: center;
             position: relative;
             z-index: 1;
-            animation: cardEntry 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            animation: cardEntry 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         @keyframes cardEntry {
             from {
                 opacity: 0;
-                transform: translateY(20px) scale(0.97);
+                transform: translateY(24px) scale(0.97);
             }
             to {
                 opacity: 1;
@@ -63,105 +78,126 @@
         }
 
         .logo-mark {
-            width: 50px; height: 50px;
-            background: #d4af37;
-            color: #000;
-            font-size: 1.6rem;
-            font-weight: 800;
-            border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
-            margin: 0 auto 20px;
-            box-shadow: 0 4px 20px rgba(212, 175, 55, 0.25);
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(100, 127, 96, 0.12), rgba(194, 162, 119, 0.2));
+            color: #647F60;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 16px;
+            border: 1px solid rgba(100, 127, 96, 0.25);
+            box-shadow: 0 4px 12px rgba(100, 127, 96, 0.15);
         }
 
-        h2 {
-            font-size: 1.4rem;
-            margin-bottom: 6px;
-            color: #fff;
+        .brand-header-title {
+            font-family: 'Allura', cursive;
+            font-size: 2.4rem;
+            color: #4B6348;
+            line-height: 1;
+            margin-bottom: 2px;
+        }
+
+        .brand-header-sub {
+            font-size: 0.72rem;
             font-weight: 700;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: #5E6D60;
+            margin-bottom: 20px;
+            display: block;
         }
 
-        p {
-            color: #8c93a0;
-            font-size: 0.88rem;
-            margin-bottom: 28px;
+        .login-card h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            color: #222E23;
+            margin-bottom: 8px;
+        }
+
+        .login-card p {
+            color: #5E6D60;
+            font-size: 0.92rem;
+            margin-bottom: 24px;
             line-height: 1.5;
         }
 
         .form-group {
-            text-align: left;
             margin-bottom: 18px;
+            text-align: left;
         }
 
         label {
             display: block;
-            font-size: 0.82rem;
-            color: #8c93a0;
-            margin-bottom: 6px;
-            font-weight: 500;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #222E23;
+            margin-bottom: 8px;
         }
 
         label i {
+            color: #647F60;
             margin-right: 4px;
-            font-size: 0.78rem;
         }
 
-        input[type="text"], input[type="password"] {
+        input {
             width: 100%;
-            padding: 12px 14px;
-            background: #1c202a;
-            border: 1px solid #262933;
-            border-radius: 8px;
-            color: #fff;
+            padding: 13px 16px;
+            background: #FAF7F2;
+            border: 1px solid rgba(100, 127, 96, 0.2);
+            border-radius: 12px;
+            color: #222E23;
             font-family: inherit;
             font-size: 0.95rem;
-            min-height: 46px;
             outline: none;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            transition: all 0.25s ease;
         }
 
         input::placeholder {
-            color: #5a5f6e;
+            color: #88968A;
         }
 
         input:focus {
-            border-color: #d4af37;
-            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+            background: #FFFFFF;
+            border-color: #647F60;
+            box-shadow: 0 0 0 3px rgba(100, 127, 96, 0.12);
         }
 
         .btn-submit {
             width: 100%;
-            padding: 13px;
-            background: #d4af37;
-            color: #000;
-            font-weight: 700;
+            padding: 14px;
+            background: linear-gradient(135deg, #647F60 0%, #4B6348 100%);
+            color: #FFFFFF;
+            font-weight: 600;
             border: none;
-            border-radius: 8px;
+            border-radius: 9999px;
             cursor: pointer;
             font-family: inherit;
-            font-size: 0.95rem;
+            font-size: 0.98rem;
             margin-top: 8px;
-            transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-            box-shadow: 0 4px 16px rgba(212, 175, 55, 0.2);
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 24px rgba(100, 127, 96, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
         .btn-submit:hover {
-            background: #b5932a;
-            transform: translateY(-1px);
-            box-shadow: 0 6px 24px rgba(212, 175, 55, 0.3);
-        }
-
-        .btn-submit:active {
-            transform: translateY(0);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px rgba(100, 127, 96, 0.35);
+            background: linear-gradient(135deg, #829E7E 0%, #647F60 100%);
         }
 
         .alert {
-            padding: 10px 14px;
-            border-radius: 8px;
-            background: rgba(230, 57, 70, 0.15);
-            color: #e63946;
-            border: 1px solid rgba(230, 57, 70, 0.3);
-            font-size: 0.85rem;
+            padding: 12px 16px;
+            border-radius: 12px;
+            background: #FFEBEE;
+            color: #C62828;
+            border: 1px solid #FFCDD2;
+            font-size: 0.88rem;
             margin-bottom: 20px;
             text-align: left;
             display: flex;
@@ -173,9 +209,14 @@
 <body>
 
     <div class="login-card">
-        <div class="logo-mark">P</div>
-        <h2>Barber Staff Login</h2>
-        <p>Enter your credentials to access the shop dashboard.</p>
+        <div class="logo-mark">
+            <i class="fa-solid fa-spa"></i>
+        </div>
+        <div class="brand-header-title">Ava's</div>
+        <span class="brand-header-sub">GLOW STUDIO</span>
+        
+        <h2>Staff Portal Login</h2>
+        <p>Enter your credentials to access the studio management system.</p>
 
         {% if messages %}
             {% for message in messages %}
@@ -186,16 +227,16 @@
         <form method="POST">
             {% csrf_token %}
             <div class="form-group">
-                <label><i class="fa-solid fa-user"></i> Username</label>
-                <input type="text" name="username" required placeholder="Enter staff username">
+                <label><i class="fa-solid fa-user"></i> Staff Username</label>
+                <input type="text" name="username" required placeholder="Enter your username">
             </div>
 
             <div class="form-group">
                 <label><i class="fa-solid fa-lock"></i> Password</label>
-                <input type="password" name="password" required placeholder="Enter password">
+                <input type="password" name="password" required placeholder="••••••••">
             </div>
 
-            <button type="submit" class="btn-submit"><i class="fa-solid fa-right-to-bracket"></i> Log In to Dashboard</button>
+            <button type="submit" class="btn-submit"><i class="fa-solid fa-arrow-right-to-bracket"></i> Sign In to Dashboard</button>
         </form>
     </div>
 

@@ -99,7 +99,7 @@ def send_booking_confirmed(booking):
             f"{booking.appointment_time.strftime('%I:%M %p')}\n"
             f"💈 Service: "
             f"{service_name}\n\n"
-            "We look forward to seeing you at Africa Barbershop."
+            "We look forward to seeing you at Ava's GLOW STUDIO."
         ),
     )
 
@@ -127,7 +127,10 @@ def send_booking_reminder(booking):
             f"{booking.appointment_time.strftime('%I:%M %p')}\n"
             f"💈 Service: "
             f"{service_name}\n\n"
-            "Your appointment at Africa Barbershop is coming up.\n"
+            "Your appointment at Ava's GLOW STUDIO is coming up.\n"
             "See you soon! 💈"
         ),
     )
+
+
+

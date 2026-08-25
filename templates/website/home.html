@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}
-{{ shop.name|default:"Africa Barber Shop" }} — Premium Grooming Experience
+{{ shop.name|default:"Ava's GLOW STUDIO" }} — Premium Grooming Experience
 {% endblock %}
 
 {% block content %}
@@ -16,6 +16,7 @@
         {% include 'components/testimonials.html' %}
         {% include 'components/gallery.html' %}
         {% include 'components/contact.html' %}
+        {% include 'components/location.html' %}
     </main>
 
     {% include 'components/footer.html' %}

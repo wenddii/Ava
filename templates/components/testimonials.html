@@ -1,25 +1,25 @@
 <section class="section-pad testimonials-section" id="testimonials">
     <div class="container">
         <div class="section-heading reveal">
-            <span class="eyebrow"><i class="fa-solid fa-star"></i> Client Reviews</span>
-            <h2>Trusted by those who value quality.</h2>
-            <p>Real words from clients who keep coming back.</p>
+            <span class="eyebrow eyebrow-gold"><i class="fa-solid fa-star"></i> Client Love</span>
+            <h2>Cherished words from our clients.</h2>
+            <p>Discover why women trust Ava's GLOW STUDIO for their beauty, relaxation, and self-care rituals.</p>
         </div>
 
         <div class="testimonial-grid">
             {% for testimonial in testimonials %}
                 <article class="testimonial-card reveal" {% if forloop.counter0 > 0 %}data-delay="{{ forloop.counter0 }}00"{% endif %}>
-                    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+                    <div class="testimonial-avatar-wrap">
                         {% if testimonial.image %}
-                            <img src="{{ testimonial.image.url }}" alt="{{ testimonial.customer_name }}" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid #d4af37;">
+                            <img src="{{ testimonial.image.url }}" alt="{{ testimonial.customer_name }}" class="testimonial-avatar">
                         {% else %}
-                            <div style="width: 80px; height: 80px; border-radius: 50%; background: #262933; color: #d4af37; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.2rem; border: 2px solid #3a3d48;">
+                            <div class="testimonial-avatar-placeholder">
                                 {{ testimonial.customer_name|slice:":1"|upper }}
                             </div>
                         {% endif %}
                         <div>
-                            <strong style="display: block; font-size: 1rem; color: #fff;">{{ testimonial.customer_name }}</strong>
-                            <div class="testimonial-rating" aria-label="{{ testimonial.rating }} out of 5 stars" style="margin-top: 2px;">
+                            <strong class="testimonial-client-name">{{ testimonial.customer_name }}</strong>
+                            <div class="testimonial-rating" aria-label="{{ testimonial.rating }} out of 5 stars">
                                 {% for star in "12345" %}
                                     <span class="{% if forloop.counter <= testimonial.rating %}active{% endif %}"><i class="fa-solid fa-star"></i></span>
                                 {% endfor %}
@@ -29,12 +29,12 @@
                     <p class="testimonial-comment">"{{ testimonial.comment }}"</p>
                 </article>
             {% empty %}
-                <div class="empty-state">No testimonials available.</div>
+                <div class="empty-state">Client reviews and love notes will appear here soon.</div>
             {% endfor %}
         </div>
     </div>
 </section>
 
 <div class="section-divider reveal">
-    <i class="fa-solid fa-scissors"></i>
+    <i class="fa-solid fa-spa"></i>
 </div>

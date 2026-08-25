@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Book Appointment — {{ shop.name|default:"Africa Barber Shop" }}{% endblock %}
+{% block title %}Book Appointment — {{ shop.name|default:"Ava's GLOW STUDIO" }}{% endblock %}
 
 {% block content %}
 
@@ -12,9 +12,9 @@
         <div class="container">
             
             <div class="booking-header">
-                <span class="eyebrow"><i class="fa-solid fa-calendar-check"></i> Reservation</span>
-                <h2>Book Your Grooming Session</h2>
-                <p>Select your desired service, pick a date &amp; time, upload your payment proof, and confirm.</p>
+                <span class="eyebrow eyebrow-gold"><i class="fa-solid fa-sparkles"></i> Easy Online Reservation</span>
+                <h2>Book Your Beauty Session</h2>
+                <p>Select your signature treatment, pick your preferred specialist, and secure your dedicated time slot.</p>
             </div>
 
             {% if messages %}
@@ -30,10 +30,12 @@
 
             {% if no_barbers_available %}
                 <div class="booking-card" style="text-align: center; padding: 60px 30px;">
-                    <i class="fa-solid fa-user-clock" style="font-size: 3rem; color: var(--gold, #d4af37); margin-bottom: 20px; display: block;"></i>
-                    <h3 style="margin-bottom: 10px; color: #fff;">No Barbers Currently Available</h3>
-                    <p style="color: #999; max-width: 400px; margin: 0 auto;">No barbers are currently available. Please visit again soon.</p>
-                    <a href="{% url 'home' %}" class="button button-ghost" style="margin-top: 24px; display: inline-flex;"><i class="fa-solid fa-house"></i> Back to Home</a>
+                    <div style="width: 70px; height: 70px; border-radius: 50%; background: var(--sage-soft); color: var(--sage); display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 20px;">
+                        <i class="fa-solid fa-calendar-xmark"></i>
+                    </div>
+                    <h3 style="margin-bottom: 10px; color: var(--text);">No Stylists Currently Available</h3>
+                    <p style="color: var(--text-muted); max-width: 400px; margin: 0 auto;">Our beauty specialists are currently booked or undergoing schedule maintenance. Please check back soon.</p>
+                    <a href="{% url 'home' %}" class="button button-ghost" style="margin-top: 24px; display: inline-flex;"><i class="fa-solid fa-house"></i> Return to Studio Home</a>
                 </div>
             {% else %}
 
@@ -46,7 +48,7 @@
                         <div class="booking-form-group">
                             <label class="booking-label">
                                 <span class="step-num">1</span>
-                                <i class="fa-solid fa-scissors"></i> Select Service *
+                                <i class="fa-solid fa-spa"></i> Select Treatment / Service *
                             </label>
                             {{ form.service }}
                             {% if form.service.errors %}
@@ -57,7 +59,7 @@
                         <div class="booking-form-group">
                             <label class="booking-label">
                                 <span class="step-num">2</span>
-                                <i class="fa-solid fa-user-tie"></i> Select Barber (Optional)
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> Preferred Stylist (Optional)
                             </label>
                             {{ form.barber }}
                             {% if form.barber.errors %}
@@ -70,7 +72,7 @@
                         <div class="booking-form-group">
                             <label class="booking-label">
                                 <span class="step-num">3</span>
-                                <i class="fa-solid fa-calendar-days"></i> Select Date * <small style="font-weight: 400; opacity: 0.7;">(Max 3 days)</small>
+                                <i class="fa-solid fa-calendar-days"></i> Appointment Date * <small style="font-weight: 400; color: var(--text-muted);">(Next 3 Days)</small>
                             </label>
                             <input type="date" name="appointment_date" class="form-control" id="id_appointment_date" value="{{ form.appointment_date.value|default:today }}" min="{{ today }}" max="{{ max_date }}" required>
                             {% if form.appointment_date.errors %}
@@ -81,7 +83,7 @@
                         <div class="booking-form-group">
                             <label class="booking-label">
                                 <span class="step-num">4</span>
-                                <i class="fa-solid fa-clock"></i> Select Time *
+                                <i class="fa-solid fa-clock"></i> Select Time Slot *
                             </label>
                             <select name="appointment_time" id="id_appointment_time" class="form-select" required>
                                 <option value="">-- Choose Date &amp; Service First --</option>
@@ -93,7 +95,7 @@
                     </div>
 
                     <div id="slot-loader" class="booking-slot-loader">
-                        <i class="fa-solid fa-spinner fa-spin"></i> Loading available slots...
+                        <i class="fa-solid fa-spinner fa-spin"></i> Checking available time slots...
                     </div>
 
                     <hr class="booking-divider">
@@ -101,7 +103,7 @@
                     <div class="booking-form-row">
                         <div class="booking-form-group">
                             <label class="booking-label">
-                                <i class="fa-solid fa-user"></i> Your Full Name *
+                                <i class="fa-solid fa-user"></i> Full Name *
                             </label>
                             {{ form.customer_name }}
                             {% if form.customer_name.errors %}
@@ -120,34 +122,34 @@
                         </div>
                     </div>
 
-                    <div class="booking-form-group" style="margin-bottom: 1.25rem;">
-                        <label class="booking-label">Notes / Special Instructions (Optional)</label>
+                    <div class="booking-form-group" style="margin-bottom: 24px;">
+                        <label class="booking-label"><i class="fa-solid fa-comment-dots"></i> Special Preferences or Notes (Optional)</label>
                         {{ form.notes }}
                     </div>
 
                     <!-- PAYMENT INSTRUCTIONS BOX -->
-                    <div class="payment-instructions-box">
-                        <h4><i class="fa-solid fa-wallet"></i> Payment Instructions</h4>
+                    <div class="booking-payment-guide">
+                        <h4><i class="fa-solid fa-wallet"></i> Payment Instructions &amp; Deposit</h4>
                         <div class="payment-instructions-content">
-                            {{ shop.payment_instructions|default:"Please transfer the service amount before completing your booking." }}
+                            {{ shop.payment_instructions|default:"Please transfer the appointment fee using CBE or Telebirr and attach your receipt below to secure your booking." }}
                         </div>
                     </div>
 
-                    <div class="booking-file-upload">
+                    <div class="booking-file-upload" style="margin-bottom: 28px;">
                         <label class="booking-label">
-                            <i class="fa-solid fa-file-arrow-up"></i> Upload Payment Screenshot / Receipt *
+                            <i class="fa-solid fa-file-arrow-up"></i> Upload Payment Receipt / Screenshot *
                         </label>
                         {{ form.payment_screenshot }}
-                        <div class="booking-file-hint">
-                            <i class="fa-solid fa-circle-info"></i> Upload a clear image/screenshot of your transfer receipt.
+                        <div class="booking-file-hint" style="margin-top: 8px; font-size: 0.85rem; color: var(--text-muted);">
+                            <i class="fa-solid fa-circle-info"></i> Upload a clear image (JPG, PNG) of your completed transfer receipt.
                         </div>
                         {% if form.payment_screenshot.errors %}
                             <span class="booking-field-error">{{ form.payment_screenshot.errors.0 }}</span>
                         {% endif %}
                     </div>
 
-                    <button type="submit" class="booking-submit-btn">
-                        <i class="fa-solid fa-paper-plane"></i> Submit Booking &amp; Payment Proof
+                    <button type="submit" class="button button-primary button-full" style="padding: 16px; font-size: 1.05rem;">
+                        <i class="fa-solid fa-heart"></i> Confirm &amp; Submit Reservation
                     </button>
                 </form>
             </div>
@@ -179,7 +181,7 @@ document.addEventListener("DOMContentLoaded", function() {
         }
 
         loader.style.display = "block";
-        timeSelect.innerHTML = '<option value="">Loading...</option>';
+        timeSelect.innerHTML = '<option value="">Loading available slots...</option>';
 
         let url = `/api/available-slots/?date=${encodeURIComponent(dateVal)}&service=${encodeURIComponent(serviceVal)}`;
         if (barberVal) {
@@ -207,7 +209,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 } else {
                     const opt = document.createElement("option");
                     opt.value = "";
-                    opt.textContent = "No available slots for this date/barber";
+                    opt.textContent = "No available slots for this date/specialist";
                     timeSelect.appendChild(opt);
                 }
             })

@@ -71,7 +71,7 @@ def telegram_webhook(request):
             send_telegram_message(
                 chat_id,
                 (
-                    "Welcome to Africa Barbershop. 👋\n\n"
+                    "Welcome to Ava's GLOW STUDIO. 👋\n\n"
                     "To enable Telegram reminders, please use "
                     "the Telegram reminder link from your booking "
                     "confirmation page."
@@ -291,3 +291,5 @@ def send_telegram_message(chat_id, text):
         )
 
         return False
+
+

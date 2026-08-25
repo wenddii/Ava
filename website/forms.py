@@ -108,7 +108,7 @@ class ShopInfoForm(forms.ModelForm):
             "phone_number": forms.TextInput(attrs={"class": "form-control"}),
             "location": forms.TextInput(attrs={"class": "form-control"}),
             "opening_hours": forms.TextInput(attrs={"class": "form-control"}),
-            "payment_instructions": forms.Textarea(attrs={"class": "form-control", "rows": 4, "placeholder": "e.g. CBE Account: 10001234567 (Africa Barber Shop), Telebirr: 0911223344"}),
+            "payment_instructions": forms.Textarea(attrs={"class": "form-control", "rows": 4, "placeholder": "e.g. CBE Account: 10001234567 (Ava's GLOW STUDIO), Telebirr: 0911223344"}),
             "instagram": forms.URLInput(attrs={"class": "form-control"}),
             "tiktok": forms.URLInput(attrs={"class": "form-control"}),
         }

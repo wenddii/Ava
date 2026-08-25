@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Barber Dashboard — Africa Barber Shop{% endblock %}</title>
+    <title>{% block title %}Barber Dashboard — Ava's GLOW STUDIO{% endblock %}</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,21 +15,21 @@
 
     <style>
         :root {
-            --bg-dark: #0f1115;
-            --bg-card: #161920;
-            --bg-sidebar: #12141a;
-            --accent-gold: #d4af37;
-            --accent-gold-hover: #b5932a;
-            --accent-gold-soft: rgba(212, 175, 55, 0.10);
-            --text-main: #f0f2f5;
-            --text-muted: #8c93a0;
-            --border-color: #262933;
-            --danger: #e63946;
-            --success: #2a9d8f;
-            --warning: #e9c46a;
-            --dash-radius: 12px;
-            --dash-radius-sm: 8px;
-            --dash-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
+            --bg-dark: #F7F4EE;
+            --bg-card: #FFFFFF;
+            --bg-sidebar: #1E281F;
+            --accent-gold: #647F60;
+            --accent-gold-hover: #4B6348;
+            --accent-gold-soft: rgba(100, 127, 96, 0.12);
+            --text-main: #222E23;
+            --text-muted: #5E6D60;
+            --border-color: rgba(100, 127, 96, 0.15);
+            --danger: #d9383a;
+            --success: #388e3c;
+            --warning: #d97706;
+            --dash-radius: 14px;
+            --dash-radius-sm: 10px;
+            --dash-shadow: 0 10px 30px rgba(34, 46, 35, 0.06);
             --dash-transition: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
@@ -1270,15 +1270,15 @@
                 <img src="{{ shop.logo.url }}" alt="{{ shop.name }}"
                     style="max-height: 40px; max-width: 140px; object-fit: contain; vertical-align: middle;">
                 {% else %}
-                <span class="logo-mark">P</span>
+                <span class="logo-mark" style="background: var(--accent-gold); color: #fff;"><i class="fa-solid fa-spa"></i></span>
                 <div>
-                    <strong>{{ shop.name|default:"Barber Admin" }}</strong>
-                    <small>Dashboard Studio</small>
+                    <strong style="color: #fff;">{{ shop.name|default:"Ava's GLOW STUDIO" }}</strong>
+                    <small style="color: #A3B5A5;">Studio Portal</small>
                 </div>
                 {% endif %}
             </a>
             <button id="sidebar-close-btn"
-                style="background: none; border: none; color: var(--text-muted); font-size: 1.2rem; padding: 16px; cursor: pointer;"
+                style="background: none; border: none; color: #A3B5A5; font-size: 1.2rem; padding: 16px; cursor: pointer;"
                 aria-label="Close menu">
                 <i class="fa-solid fa-xmark"></i>
             </button>
@@ -1301,11 +1301,11 @@
 
             <a href="{% url 'dashboard_services' %}"
                 class="{% if request.resolver_match.url_name == 'dashboard_services' %}active{% endif %}">
-                <i class="fa-solid fa-scissors"></i> Services
+                <i class="fa-solid fa-spa"></i> Services &amp; Treatments
             </a>
             <a href="{% url 'dashboard_barbers' %}"
                 class="{% if request.resolver_match.url_name == 'dashboard_barbers' %}active{% endif %}">
-                <i class="fa-solid fa-user-tie"></i> Barbers
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Stylists &amp; Artists
             </a>
             <a href="{% url 'dashboard_gallery' %}"
                 class="{% if request.resolver_match.url_name == 'dashboard_gallery' %}active{% endif %}">
@@ -1313,7 +1313,7 @@
             </a>
             <a href="{% url 'dashboard_shop_info' %}"
                 class="{% if request.resolver_match.url_name == 'dashboard_shop_info' %}active{% endif %}">
-                <i class="fa-solid fa-store"></i> Shop Info & Payment
+                <i class="fa-solid fa-store"></i> Studio Info &amp; Payment
             </a>
             <a href="{% url 'home' %}" target="_blank">
                 <i class="fa-solid fa-arrow-up-right-from-square"></i> Public Website

@@ -1,32 +1,42 @@
 <section class="section-pad services-section" id="services">
     <div class="container">
         <div class="section-heading reveal">
-            <span class="eyebrow"><i class="fa-solid fa-scissors"></i> Our Services</span>
-            <h2>Crafted grooming for every detail.</h2>
-            <p>Each service is delivered with care, precision, and dedicated time slots.</p>
+            <span class="eyebrow"><i class="fa-solid fa-spa"></i> Signature Treatments</span>
+            <h2>Indulgent beauty therapies tailored for you.</h2>
+            <p>Every treatment is crafted with organic essences, dedicated artistry, and meticulous attention to detail.</p>
         </div>
 
         <div class="service-grid">
             {% for service in services %}
                 <article class="service-card reveal" {% if forloop.counter0 > 0 %}data-delay="{{ forloop.counter }}00"{% endif %}>
-                    <div class="service-card-head">
-                        <h3><i class="fa-solid fa-scissors"></i> {{ service.name }}</h3>
-                        <div style="text-align: right;">
-                            <small style="color: #888;"><i class="fa-regular fa-clock"></i> {{ service.duration }} mins</small>
+                    <div>
+                        <div class="service-card-head">
+                            <h3><i class="fa-solid fa-wand-magic-sparkles"></i> {{ service.name }}</h3>
+                            <span class="service-duration-badge">
+                                <i class="fa-regular fa-clock"></i> {{ service.duration }} mins
+                            </span>
                         </div>
+                        {% if service.price %}
+                            <div class="service-price">
+                                {{ service.price }} <span style="font-size: 0.85rem; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 500; color: var(--text-muted);">ETB</span>
+                            </div>
+                        {% endif %}
+                        <p>{{ service.description }}</p>
                     </div>
-                    <p>{{ service.description }}</p>
-                    <div style="margin-top: 15px;">
-                        <a href="{% url 'booking' %}?service={{ service.id }}" class="button button-sm button-primary"><i class="fa-solid fa-calendar-plus"></i> Book This Service</a>
+
+                    <div style="margin-top: 18px;">
+                        <a href="{% url 'booking' %}?service={{ service.id }}" class="button button-sm button-primary button-full">
+                            <i class="fa-solid fa-calendar-plus"></i> Reserve Treatment
+                        </a>
                     </div>
                 </article>
             {% empty %}
-                <div class="empty-state">No services available.</div>
+                <div class="empty-state">Our signature service menu is currently being refreshed. Please check back soon!</div>
             {% endfor %}
         </div>
     </div>
 </section>
 
 <div class="section-divider reveal">
-    <i class="fa-solid fa-scissors"></i>
+    <i class="fa-solid fa-spa"></i>
 </div>

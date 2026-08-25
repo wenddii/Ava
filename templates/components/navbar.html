@@ -1,47 +1,52 @@
+{% load static %}
+
 <header class="site-header" id="site-header">
     <div class="container nav-bar">
-        <a class="brand" href="{% url 'home' %}#top" aria-label="{{ shop.name|default:'Africa Barber Shop' }} home">
+        <a class="brand" href="{% url 'home' %}#top" aria-label="{% if shop.name %}{{ shop.name }}{% else %}Ava's GLOW STUDIO{% endif %} home">
             {% if shop and shop.logo %}
-                <img src="{{ shop.logo.url }}" alt="{{ shop.name }}" class="brand-logo-img" style="max-height: 48px; max-width: 180px; object-fit: contain; vertical-align: middle; transition: transform 0.2s ease;">
+                <img src="{{ shop.logo.url }}" alt="{{ shop.name }}" class="brand-logo-img" style="max-height: 48px; max-width: 180px; object-fit: contain; vertical-align: middle;">
             {% else %}
-                <span class="brand-mark">A</span>
-                <span class="brand-text">
-                    <strong>{{ shop.name|default:"Africa Barber Shop" }}</strong>
-                    <small>Luxury Grooming Studio</small>
-                </span>
+                <div class="brand-icon-wrap" aria-hidden="true">
+                    <i class="fa-solid fa-spa"></i>
+                </div>
+                <div class="brand-text">
+                    <span class="brand-title">
+                        <span class="script-part">Ava's</span>
+                    </span>
+                    <span class="brand-subtitle">GLOW STUDIO</span>
+                </div>
             {% endif %}
         </a>
 
         <nav class="nav-links" aria-label="Primary navigation">
             <a href="{% url 'home' %}#about">About</a>
-            <a href="{% url 'home' %}#services">Services</a>
-            <a href="{% url 'home' %}#barbers">Barbers</a>
+            <a href="{% url 'home' %}#services">Treatments</a>
+            <a href="{% url 'home' %}#barbers">Stylists</a>
             <a href="{% url 'home' %}#testimonials">Reviews</a>
             <a href="{% url 'home' %}#gallery">Gallery</a>
             <a href="{% url 'home' %}#contact">Contact</a>
-            <a href="{% url 'track_booking' %}">Track Booking</a>
         </nav>
 
-        <div style="display: flex; align-items: center; gap: 15px;">
-            <a class="nav-cta" href="{% url 'booking' %}"><i class="fa-solid fa-calendar-check"></i> Book Appointment</a>
-
-            <button class="nav-toggle" id="nav-toggle" aria-label="Open menu" aria-expanded="false">
-                <span></span>
-                <span></span>
-                <span></span>
+        <div class="nav-actions">
+            <a class="button button-sm button-primary" href="{% url 'booking' %}">
+                <i class="fa-solid fa-calendar-check"></i> Book Now
+            </a>
+            <button class="nav-toggle" id="nav-toggle" aria-label="Toggle Navigation Menu" aria-expanded="false">
+                <i class="fa-solid fa-bars"></i>
             </button>
         </div>
     </div>
-</header>
 
-<!-- Mobile navigation overlay -->
-<nav class="mobile-nav" id="mobile-nav" aria-label="Mobile navigation">
-    <a href="{% url 'home' %}#about">About</a>
-    <a href="{% url 'home' %}#services">Services</a>
-    <a href="{% url 'home' %}#barbers">Barbers</a>
-    <a href="{% url 'home' %}#testimonials">Reviews</a>
-    <a href="{% url 'home' %}#gallery">Gallery</a>
-    <a href="{% url 'home' %}#contact">Contact</a>
-    <a href="{% url 'track_booking' %}">Track Booking</a>
-    <a href="{% url 'booking' %}">Book Appointment</a>
-</nav>
+    <!-- Mobile Navigation Drawer -->
+    <div class="mobile-nav" id="mobile-nav">
+        <a href="{% url 'home' %}#about">About Our Studio</a>
+        <a href="{% url 'home' %}#services">Services &amp; Treatments</a>
+        <a href="{% url 'home' %}#barbers">Our Stylists</a>
+        <a href="{% url 'home' %}#testimonials">Client Reviews</a>
+        <a href="{% url 'home' %}#gallery">Studio Gallery</a>
+        <a href="{% url 'home' %}#contact">Contact Us</a>
+        <a href="{% url 'booking' %}" class="button button-primary button-full" style="margin-top: 15px; color: #fff;">
+            <i class="fa-solid fa-calendar-check"></i> Book Appointment
+        </a>
+    </div>
+</header>

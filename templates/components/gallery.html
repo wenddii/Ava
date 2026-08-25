@@ -1,28 +1,28 @@
 <section class="section-pad gallery-section" id="gallery">
     <div class="container">
         <div class="section-heading reveal">
-            <span class="eyebrow"><i class="fa-solid fa-images"></i> Gallery</span>
-            <h2>A look inside the experience.</h2>
-            <p>Our best cuts, studio atmosphere, and the attention to detail that defines Africa Barber Shop.</p>
+            <span class="eyebrow"><i class="fa-solid fa-camera-retro"></i> Studio Moments</span>
+            <h2>A glimpse into radiant transformations.</h2>
+            <p>Explore our serene space, artistry, and the attention to detail that defines Ava's GLOW STUDIO.</p>
         </div>
 
         <div class="gallery-grid">
             {% for image in gallery %}
                 <figure class="gallery-card reveal-scale" {% if forloop.counter0 > 0 %}data-delay="{{ forloop.counter0 }}0"{% endif %}>
                     {% if image.image %}
-                        <img src="{{ image.image.url }}" alt="{{ image.caption }}" loading="lazy">
+                        <img src="{{ image.image.url }}" alt="{{ image.caption|default:'Ava\'s Glow Studio' }}" loading="lazy">
                     {% endif %}
                     {% if image.caption %}
                         <figcaption>{{ image.caption }}</figcaption>
                     {% endif %}
                 </figure>
             {% empty %}
-                <div class="empty-state">No gallery images available.</div>
+                <div class="empty-state">Studio photos and transformation highlights are coming soon.</div>
             {% endfor %}
         </div>
     </div>
 </section>
 
 <div class="section-divider reveal">
-    <i class="fa-solid fa-scissors"></i>
+    <i class="fa-solid fa-spa"></i>
 </div>

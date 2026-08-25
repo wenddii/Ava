@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Booking Submitted — {{ shop.name|default:"Africa Barber Shop" }}{% endblock %}
+{% block title %}Booking Submitted — {{ shop.name|default:"Ava's GLOW STUDIO" }}{% endblock %}
 
 {% block content %}
 
@@ -13,125 +13,85 @@
             <div class="success-card">
                 
                 <div class="success-icon">
-                    <i class="fa-solid fa-circle-check"></i>
+                    <i class="fa-solid fa-heart"></i>
                 </div>
 
-                <h2>Booking Submitted Successfully!</h2>
+                <span class="eyebrow eyebrow-gold" style="margin-bottom: 12px;">Reservation Received</span>
+                <h2>We Can’t Wait to Welcome You!</h2>
                 
-                <p class="success-message">
-                    Thank you, <strong>{{ booking.customer_name }}</strong>. Your appointment request has been received and is currently 
-                    <span class="success-badge">Pending Verification</span>.
+                <p style="color: var(--text-muted); font-size: 1.05rem; margin-bottom: 24px;">
+                    Thank you, <strong>{{ booking.customer_name }}</strong>. Your appointment request has been registered and is currently 
+                    <span class="status-badge status-pending">Pending Verification</span>.
                 </p>
 
-                <div class="success-summary">
-                    <h4>Booking Summary</h4>
+                <div class="booking-receipt-box">
+                    <h4 style="font-family: 'Playfair Display', serif; font-size: 1.2rem; margin-bottom: 14px; color: var(--text); border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+                        <i class="fa-solid fa-receipt" style="color: var(--sage); margin-right: 6px;"></i> Appointment Summary
+                    </h4>
 
-                    <div class="success-summary-row">
-                        <span class="success-summary-label">Booking ID</span>
-                        <span class="success-summary-value">#{{ booking.id }}</span>
+                    <div class="receipt-row">
+                        <span class="receipt-label">Booking Reference</span>
+                        <span class="receipt-value" style="color: var(--sage-dark);">#{{ booking.id }}</span>
                     </div>
 
-                    <div class="success-summary-row">
-                        <span class="success-summary-label">Service</span>
-                        <span class="success-summary-value">
-                            {{ booking.service.name }}
-                        </span>
+                    <div class="receipt-row">
+                        <span class="receipt-label">Signature Service</span>
+                        <span class="receipt-value">{{ booking.service.name }}</span>
                     </div>
 
                     {% if booking.barber %}
-                    <div class="success-summary-row">
-                        <span class="success-summary-label">Barber</span>
-                        <span class="success-summary-value">{{ booking.barber.name }}</span>
+                    <div class="receipt-row">
+                        <span class="receipt-label">Dedicated Specialist</span>
+                        <span class="receipt-value">{{ booking.barber.name }}</span>
                     </div>
                     {% endif %}
 
-                    <div class="success-summary-row">
-                        <span class="success-summary-label">Date</span>
-                        <span class="success-summary-value">
-                            {{ booking.appointment_date|date:"l, F j, Y" }}
-                        </span>
+                    <div class="receipt-row">
+                        <span class="receipt-label">Appointment Date</span>
+                        <span class="receipt-value">{{ booking.appointment_date|date:"l, F j, Y" }}</span>
                     </div>
 
-                    <div class="success-summary-row">
-                        <span class="success-summary-label">Time</span>
-                        <span class="success-summary-value">
-                            {{ booking.appointment_time|time:"g:i A" }}
-                        </span>
+                    <div class="receipt-row">
+                        <span class="receipt-label">Scheduled Time</span>
+                        <span class="receipt-value">{{ booking.appointment_time|time:"g:i A" }}</span>
                     </div>
 
-                    <div class="success-summary-row">
-                        <span class="success-summary-label">Phone</span>
-                        <span class="success-summary-value">
-                            {{ booking.phone_number }}
-                        </span>
+                    <div class="receipt-row">
+                        <span class="receipt-label">Contact Phone</span>
+                        <span class="receipt-value">{{ booking.phone_number }}</span>
                     </div>
 
-                    <div class="success-summary-row">
-                        <span class="success-summary-label">Payment</span>
-                        <span class="success-summary-value status">
-                            {{ booking.get_payment_status_display }}
+                    <div class="receipt-row">
+                        <span class="receipt-label">Payment Status</span>
+                        <span class="receipt-value">
+                            <span class="status-badge status-pending">{{ booking.get_payment_status_display }}</span>
                         </span>
                     </div>
                 </div>
-
 
                 <!-- Telegram Reminder -->
-                <div class="telegram-reminder-card">
-
-                    <div class="telegram-reminder-icon">
+                <div style="background: linear-gradient(135deg, var(--sage-soft), rgba(194, 162, 119, 0.15)); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; margin-bottom: 30px; text-align: center;">
+                    <div style="font-size: 2rem; color: #229ED9; margin-bottom: 8px;">
                         <i class="fa-brands fa-telegram"></i>
                     </div>
-
-                    <div class="telegram-reminder-content">
-                        <h3>Get a Telegram Reminder</h3>
-
-                        <p>
-                            Don't forget your appointment. Connect Telegram and
-                            we'll send you a reminder before your appointment.
-                        </p>
-
-                        <a
-                            href="{{ telegram_link }}"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            class="button button-primary telegram-button"
-                        >
-                            <i class="fa-brands fa-telegram"></i>
-                            Enable Telegram Reminders
-                        </a>
-
-                        <small>
-                            This is completely optional. You can continue without
-                            enabling reminders.
-                        </small>
-                    </div>
-
+                    <h3 style="font-size: 1.2rem; margin-bottom: 8px;">Get Real-Time Telegram Reminders</h3>
+                    <p style="font-size: 0.92rem; color: var(--text-muted); max-width: 480px; margin: 0 auto 16px;">
+                        Connect our Telegram assistant to receive instant confirmation alerts and scheduled reminders before your visit.
+                    </p>
+                    <a href="{{ telegram_link }}" target="_blank" rel="noopener noreferrer" class="button button-sm button-primary" style="background: #229ED9; border-color: #229ED9;">
+                        <i class="fa-brands fa-telegram"></i> Connect Telegram Bot
+                    </a>
                 </div>
 
-
-                <div class="success-actions">
-                    <a
-                        href="{% url 'track_booking' %}?phone={{ booking.phone_number|urlencode }}"
-                        class="button button-primary"
-                    >
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                        Track My Booking
+                <div style="display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;">
+                    <a href="{% url 'track_booking' %}?phone={{ booking.phone_number|urlencode }}" class="button button-primary">
+                        <i class="fa-solid fa-magnifying-glass"></i> Track My Status
                     </a>
-
-                    <a
-                        href="{% url 'home' %}"
-                        class="button button-ghost"
-                    >
-                        <i class="fa-solid fa-house"></i>
-                        Home
+                    <a href="{% url 'home' %}" class="button button-ghost">
+                        <i class="fa-solid fa-house"></i> Studio Home
                     </a>
-
-                    <a
-                        href="{% url 'booking' %}"
-                        class="button button-ghost"
-                    >
-                        <i class="fa-solid fa-plus"></i>
-                        New Booking
+                    <a href="{% url 'booking' %}" class="button button-ghost">
+                        <i class="fa-solid fa-plus"></i> Book Another
                     </a>
                 </div>
 

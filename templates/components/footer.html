@@ -4,32 +4,51 @@
             {% if shop and shop.logo %}
                 <img src="{{ shop.logo.url }}" alt="{{ shop.name }}" style="max-height: 50px; max-width: 180px; object-fit: contain; margin-bottom: 12px; display: block;">
             {% else %}
-                <strong style="font-size: 1.2rem; color: #fff; display: block; margin-bottom: 8px;">{{ shop.name|default:"Africa Barber Shop" }}</strong>
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px;">
+                    <div style="width: 38px; height: 38px; border-radius: 50%; background: var(--sage); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
+                        <i class="fa-solid fa-spa"></i>
+                    </div>
+                    <div>
+                        <span style="font-family: 'Allura', cursive; font-size: 1.8rem; color: #FFFFFF; line-height: 1; display: block;">Ava's</span>
+                        <span style="font-size: 0.65rem; font-weight: 700; letter-spacing: 0.2em; color: #A3B5A5; display: block; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 2px;">GLOW STUDIO</span>
+                    </div>
+                </div>
             {% endif %}
-            <p>{{ shop.description|default:"Premium grooming crafted with precision and care. Where every cut tells a story." }}</p>
+            <p>{{ shop.description|default:"A luxury sanctuary of bespoke hair artistry, radiant skincare, and wellness designed to inspire your inner confidence." }}</p>
         </div>
         <div class="footer-links">
-            <a href="{% url 'home' %}#about">About</a>
-            <a href="{% url 'home' %}#services">Services</a>
-            <a href="{% url 'home' %}#barbers">Barbers</a>
-            <a href="{% url 'home' %}#testimonials">Reviews</a>
-            <a href="{% url 'home' %}#gallery">Gallery</a>
+            <strong style="color: #fff; font-size: 1rem; margin-bottom: 6px; display: block;">Quick Navigation</strong>
+            <a href="{% url 'home' %}#about">About the Studio</a>
+            <a href="{% url 'home' %}#services">Treatments &amp; Menu</a>
+            <a href="{% url 'home' %}#barbers">Our Stylists</a>
+            <a href="{% url 'home' %}#testimonials">Client Reviews</a>
+            <a href="{% url 'home' %}#gallery">Photo Gallery</a>
             <a href="{% url 'booking' %}">Book Appointment</a>
-            <a href="{% url 'dashboard_index' %}">Barber Dashboard</a>
+            <a href="{% url 'dashboard_index' %}" style="opacity: 0.6; font-size: 0.8rem;">Staff Portal</a>
         </div>
-        <div class="footer-social">
-            {% if shop and shop.instagram %}
-                <a href="{{ shop.instagram }}" target="_blank" rel="noopener" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
-            {% endif %}
-            {% if shop and shop.tiktok %}
-                <a href="{{ shop.tiktok }}" target="_blank" rel="noopener" aria-label="TikTok"><i class="fa-brands fa-tiktok"></i></a>
-            {% endif %}
+        <div class="footer-social-wrap">
+            <strong style="color: #fff; font-size: 1rem; margin-bottom: 14px; display: block;">Follow Our Journey</strong>
+            <div class="footer-social">
+                {% if shop and shop.instagram %}
+                    <a href="{{ shop.instagram }}" target="_blank" rel="noopener" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                {% else %}
+                    <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                {% endif %}
+                {% if shop and shop.tiktok %}
+                    <a href="{{ shop.tiktok }}" target="_blank" rel="noopener" aria-label="TikTok"><i class="fa-brands fa-tiktok"></i></a>
+                {% else %}
+                    <a href="#" aria-label="TikTok"><i class="fa-brands fa-tiktok"></i></a>
+                {% endif %}
+            </div>
+            <p style="margin-top: 18px; font-size: 0.85rem; color: #8C9F8E;">
+                <i class="fa-solid fa-location-dot" style="color: var(--gold-light); margin-right: 6px;"></i> {{ shop.location|default:"Bole, Addis Ababa, Ethiopia" }}
+            </p>
         </div>
     </div>
     <div class="container">
         <div class="footer-bottom">
-            <span>&copy; {% now "Y" %} {{ shop.name|default:"Africa Barber Shop" }}. All rights reserved.</span>
-            <span>{{ shop.location|default:"Addis Ababa, Ethiopia" }}</span>
+            <span>&copy; {% now "Y" %} {{ shop.name|default:"Ava's GLOW STUDIO" }}. All rights reserved.</span>
+            <span>Handcrafted with elegance &amp; care.</span>
         </div>
     </div>
 </footer>

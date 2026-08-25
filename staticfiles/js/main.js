@@ -1,11 +1,11 @@
 /* ================================================================
-   PARADISE BARBER SHOP — Interactions & Animations
+   AVA'S GLOW STUDIO — Interactions, Counters & Smooth Animations
    ================================================================ */
 
 document.addEventListener('DOMContentLoaded', () => {
 
     // ────────────────────────────────────────────────────────────
-    // 1. REVEAL ANIMATIONS (with stagger support)
+    // 1. REVEAL ANIMATIONS (IntersectionObserver with Stagger)
     // ────────────────────────────────────────────────────────────
     const revealSelectors = '.reveal, .reveal-left, .reveal-right, .reveal-scale';
     const revealItems = document.querySelectorAll(revealSelectors);
@@ -28,40 +28,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
         revealItems.forEach((item) => revealObserver.observe(item));
     } else {
-        // Fallback: show everything immediately
         revealItems.forEach((item) => item.classList.add('is-visible'));
     }
 
     // ────────────────────────────────────────────────────────────
-    // 2. HEADER — Solid on scroll
+    // 2. HEADER — Translucent to solid blur on scroll
     // ────────────────────────────────────────────────────────────
     const header = document.getElementById('site-header');
     if (header) {
         const onScroll = () => {
-            header.classList.toggle('header-scrolled', window.scrollY > 60);
+            header.classList.toggle('header-scrolled', window.scrollY > 40);
         };
         window.addEventListener('scroll', onScroll, { passive: true });
-        onScroll(); // initial check
+        onScroll();
     }
 
     // ────────────────────────────────────────────────────────────
-    // 3. MOBILE NAV — Hamburger toggle
+    // 3. MOBILE NAV — Drawer toggle
     // ────────────────────────────────────────────────────────────
     const navToggle = document.getElementById('nav-toggle');
     const mobileNav = document.getElementById('mobile-nav');
 
     if (navToggle && mobileNav) {
         navToggle.addEventListener('click', () => {
-            const isOpen = navToggle.classList.toggle('is-open');
-            mobileNav.classList.toggle('is-open', isOpen);
+            const isOpen = mobileNav.classList.toggle('is-open');
             navToggle.setAttribute('aria-expanded', isOpen);
             document.body.style.overflow = isOpen ? 'hidden' : '';
         });
 
-        // Close mobile nav when a link is clicked
         mobileNav.querySelectorAll('a').forEach((link) => {
             link.addEventListener('click', () => {
-                navToggle.classList.remove('is-open');
                 mobileNav.classList.remove('is-open');
                 navToggle.setAttribute('aria-expanded', 'false');
                 document.body.style.overflow = '';
@@ -70,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ────────────────────────────────────────────────────────────
-    // 4. ACTIVE NAV LINK — Scroll spy
+    // 4. ACTIVE NAV LINK — Scroll Spy
     // ────────────────────────────────────────────────────────────
     const navLinks = document.querySelectorAll('.nav-links a');
     const sections = [];
@@ -97,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         }, {
-            threshold: 0,
+            threshold: 0.2,
             rootMargin: '-20% 0px -60% 0px',
         });
 
@@ -105,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ────────────────────────────────────────────────────────────
-    // 5. ANIMATED COUNTERS — Stats section
+    // 5. ANIMATED COUNTERS — Stats Section
     // ────────────────────────────────────────────────────────────
     const counters = document.querySelectorAll('[data-count]');
 
@@ -117,7 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     obs.unobserve(entry.target);
                 }
             });
-        }, { threshold: 0.5 });
+        }, { threshold: 0.4 });
 
         counters.forEach((el) => counterObserver.observe(el));
     }
@@ -127,31 +123,29 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isNaN(target)) return;
 
         const decimals = parseInt(el.dataset.decimals || 0, 10);
-        const duration = 1800;
+        const duration = 1600;
         const startTime = performance.now();
 
         function update(currentTime) {
             const elapsed = currentTime - startTime;
             const progress = Math.min(elapsed / duration, 1);
 
-            // Ease-out cubic
             const eased = 1 - Math.pow(1 - progress, 3);
             const current = eased * target;
 
             if (decimals > 0) {
                 el.textContent = current.toFixed(decimals);
             } else {
-                el.textContent = Math.floor(current) + '+';
+                el.textContent = Math.floor(current) + (target >= 100 ? '+' : '+');
             }
 
             if (progress < 1) {
                 requestAnimationFrame(update);
             } else {
-                // Final value
                 if (decimals > 0) {
                     el.textContent = target.toFixed(decimals);
                 } else {
-                    el.textContent = target + '+';
+                    el.textContent = target + (target >= 100 ? '+' : '+');
                 }
             }
         }
@@ -160,7 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ────────────────────────────────────────────────────────────
-    // 6. SMOOTH SCROLL — For anchor links
+    // 6. SMOOTH SCROLL — Anchor links
     // ────────────────────────────────────────────────────────────
     document.querySelectorAll('a[href*="#"]').forEach((anchor) => {
         anchor.addEventListener('click', (e) => {
@@ -171,7 +165,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const targetPath = href.slice(0, hashIndex);
             const targetId = href.slice(hashIndex);
 
-            // Only smooth scroll if on current page
             if (targetPath && targetPath !== window.location.pathname && targetPath !== '/') return;
             if (targetId === '#' || targetId === '#top') {
                 if (targetId === '#top') {
@@ -186,7 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (targetEl) {
                     e.preventDefault();
                     const headerHeight = header ? header.offsetHeight : 0;
-                    const top = targetEl.getBoundingClientRect().top + window.scrollY - headerHeight - 16;
+                    const top = targetEl.getBoundingClientRect().top + window.scrollY - headerHeight - 12;
 
                     window.scrollTo({
                         top,
@@ -194,9 +187,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                 }
             } catch (err) {
-                // Ignore invalid CSS selector
+                // Ignore selector error
             }
         });
     });
-
 });

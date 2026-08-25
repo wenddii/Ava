@@ -9,7 +9,7 @@ class BookingSystemTests(TestCase):
     def setUp(self):
         self.client = Client()
         self.shop = ShopInfo.objects.create(
-            name="Africa Barber Shop",
+            name="Ava's GLOW STUDIO",
             description="Luxury grooming",
             phone_number="0911223344",
             location="Addis Ababa",
@@ -208,7 +208,7 @@ class BookingSystemTests(TestCase):
         self.client.login(username="barber_admin", password="password123")
         logo_upload = SimpleUploadedFile(name="new_logo.gif", content=b"GIF89a\x01\x00\x01\x00\x80\x00\x00\xff\xff\xff\x00\x00\x00!\xf9\x04\x01\x00\x00\x00\x00,\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02D\x01\x00;", content_type="image/gif")
         response = self.client.post("/dashboard/shop/", {
-            "name": "Africa Barber Shop Studio",
+            "name": "Ava's GLOW STUDIO",
             "phone_number": "0911998877",
             "location": "Bole, Addis Ababa",
             "opening_hours": "08:00 AM - 09:00 PM",
@@ -218,7 +218,7 @@ class BookingSystemTests(TestCase):
         })
         self.assertEqual(response.status_code, 302)
         self.shop.refresh_from_db()
-        self.assertEqual(self.shop.name, "Africa Barber Shop Studio")
+        self.assertEqual(self.shop.name, "Ava's GLOW STUDIO")
         self.assertTrue(bool(self.shop.logo))
 
     def test_customer_booking_tracking(self):

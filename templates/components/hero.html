@@ -1,25 +1,32 @@
 {% load static %}
 
 <section class="hero section-pad" style="background-image: url('{% static 'images/hero.jpg' %}');">
+    <div class="hero-halo"></div>
     <div class="container hero-grid hero-grid-minimal">
-        <div class="hero-copy">
-            <span class="eyebrow">Premium Grooming Experience</span>
-            <span class="eyebrow-line"></span>
-            <h1>Where Every Cut<br><em>Tells a Story</em></h1>
+        <div class="hero-copy reveal">
+            <span class="eyebrow eyebrow-gold">
+                <i class="fa-solid fa-sparkles"></i> Luxury Beauty &amp; Wellness Studio
+            </span>
+            
+            <h1>Radiate Confidence &amp;<br><em>Timeless Beauty</em></h1>
+            
             <p class="hero-lead">
-                Precision cuts and luxury grooming crafted for the modern gentleman.
+                Bespoke hair artistry, radiant skincare treatments, and luxury self-care crafted for your natural glow.
             </p>
 
             <div class="hero-actions">
-                <a class="button button-primary" href="{% url 'booking' %}"><i class="fa-solid fa-calendar-check"></i>
-                    Book Appointment</a>
-                <a class="button button-ghost" href="#services"><i class="fa-solid fa-scissors"></i> View Services</a>
+                <a class="button button-primary hero-btn-main" href="{% url 'booking' %}">
+                    <i class="fa-solid fa-calendar-check"></i> Book Your Session
+                </a>
+                <a class="button button-ghost" href="#services">
+                    <i class="fa-solid fa-spa"></i> Explore Treatments
+                </a>
             </div>
         </div>
     </div>
 
     <div class="hero-scroll">
-        <span>Scroll</span>
+        <span>Discover</span>
         <div class="hero-scroll-line"></div>
     </div>
 </section>
@@ -29,25 +36,25 @@
     <div class="container">
         <div class="stats-grid">
             <div class="stat-item reveal">
-                <span class="stat-number" data-count="500">0</span>
+                <span class="stat-number" data-count="500">500</span>
                 <span class="stat-label">Happy Clients</span>
             </div>
             <div class="stat-item reveal" data-delay="100">
-                <span class="stat-number" data-count="5">0</span>
-                <span class="stat-label">Years of Craft</span>
+                <span class="stat-number" data-count="5">5</span>
+                <span class="stat-label">Years of Artistry</span>
             </div>
             <div class="stat-item reveal" data-delay="200">
-                <span class="stat-number" data-count="4.9" data-decimals="1">0</span>
-                <span class="stat-label">Star Rating</span>
+                <span class="stat-number" data-count="4.9" data-decimals="1">4.9</span>
+                <span class="stat-label">Star Experience</span>
             </div>
             <div class="stat-item reveal" data-delay="300">
-                <span class="stat-number" data-count="6">0</span>
-                <span class="stat-label">Expert Barbers</span>
+                <span class="stat-number" data-count="100">100</span>
+                <span class="stat-label">% Tailored Care</span>
             </div>
         </div>
     </div>
 </section>
 
-<div class="section-divider reveal">
-    <i class="fa-solid fa-scissors"></i>
+<div class="section-divider reveal" id="about">
+    <i class="fa-solid fa-spa"></i>
 </div>

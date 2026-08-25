@@ -1,0 +1,94 @@
+<section class="section-pad location-section" id="location">
+    <div class="container">
+        <div class="section-heading reveal">
+            <span class="eyebrow eyebrow-gold">
+                <i class="fa-solid fa-map-location-dot"></i> Studio Location
+            </span>
+            <h2>Visit Our Studio</h2>
+            <p>Experience radiant self-care in a peaceful, luxury setting. Find our studio location, hours, and direct
+                navigation below.</p>
+        </div>
+
+        <div class="location-grid">
+            <!-- Left Side: Contact Information Card -->
+            <div class="location-card reveal-left">
+                <div class="location-card-header">
+                    <div class="location-icon-badge">
+                        <i class="fa-solid fa-spa"></i>
+                    </div>
+                    <div>
+                        <h3>Visit Our Studio</h3>
+                        <p class="location-card-lead">We look forward to welcoming you for an indulgent beauty
+                            experience.</p>
+                    </div>
+                </div>
+
+                <div class="location-info-list">
+                    <div class="location-info-item">
+                        <div class="location-item-icon">
+                            <i class="fa-solid fa-location-dot"></i>
+                        </div>
+                        <div class="location-item-content">
+                            <span class="location-item-label">Studio Address</span>
+                            <span class="location-item-value">{{ shop.location|default:"Bole, Addis Ababa, Ethiopia"
+                                }}</span>
+                        </div>
+                    </div>
+
+                    <div class="location-info-item">
+                        <div class="location-item-icon">
+                            <i class="fa-solid fa-phone"></i>
+                        </div>
+                        <div class="location-item-content">
+                            <span class="location-item-label">Phone &amp; Inquiries</span>
+                            <a href="tel:{{ shop.phone_number|default:'+251911000000' }}" class="location-item-link">
+                                {{ shop.phone_number|default:"+251 911 000 000" }}
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="location-info-item">
+                        <div class="location-item-icon">
+                            <i class="fa-solid fa-envelope"></i>
+                        </div>
+                        <div class="location-item-content">
+                            <span class="location-item-label">Email Address</span>
+                            <a href="mailto:{{ shop.email|default:'info@avasglowstudio.com' }}"
+                                class="location-item-link">
+                                {{ shop.email|default:"info@avasglowstudio.com" }}
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="location-info-item">
+                        <div class="location-item-icon">
+                            <i class="fa-solid fa-clock"></i>
+                        </div>
+                        <div class="location-item-content">
+                            <span class="location-item-label">Opening Hours</span>
+                            <span class="location-item-value">{{ shop.opening_hours|default:"Mon - Sat: 09:00 AM - 08:00
+                                PM (Sun: By Appointment)" }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="location-card-actions">
+                    <a href="https://maps.google.com/?q={{ shop.location|default:'Bole+Addis+Ababa'|urlencode }}"
+                        target="_blank" rel="noopener noreferrer" class="button button-primary button-full"
+                        aria-label="Get Directions to Ava's Glow Studio on Google Maps">
+                        <i class="fa-solid fa-diamond-turn-right"></i> Get Directions
+                    </a>
+                </div>
+            </div>
+
+            <!-- Right Side: Google Map Embed -->
+            <div class="location-map-wrap reveal-right" data-delay="100">
+                <iframe
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3940.7640524704757!2d38.78753327352808!3d8.993845889541289!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x164b85004e5142bf%3A0x309bcabcd20067f5!2sAva%E2%80%99s%20Glow%20studio!5e0!3m2!1sen!2set!4v1787627424838!5m2!1sen!2set"
+                    title="Ava's Glow Studio Location Map" class="location-map-iframe" loading="lazy" allowfullscreen
+                    referrerpolicy="strict-origin-when-cross-origin">
+                </iframe>
+            </div>
+        </div>
+    </div>
+</section>
