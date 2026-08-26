@@ -76,6 +76,9 @@ html {
     scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
 }
 
 body {
@@ -83,6 +86,8 @@ body {
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
+    width: 100%;
+    max-width: 100%;
     line-height: 1.75;
     font-weight: 400;
     overflow-x: hidden;
@@ -93,10 +98,13 @@ body {
 body::before {
     content: '';
     position: fixed;
-    top: -10vw;
-    right: -10vw;
+    top: 0;
+    right: 0;
     width: 45vw;
     height: 45vw;
+    max-width: 500px;
+    max-height: 500px;
+    transform: translate(20%, -20%);
     background: radial-gradient(circle, rgba(194, 162, 119, 0.09) 0%, rgba(250, 247, 242, 0) 70%);
     pointer-events: none;
     z-index: 0;
@@ -105,19 +113,26 @@ body::before {
 body::after {
     content: '';
     position: fixed;
-    bottom: -10vw;
-    left: -10vw;
+    bottom: 0;
+    left: 0;
     width: 40vw;
     height: 40vw;
+    max-width: 450px;
+    max-height: 450px;
+    transform: translate(-20%, 20%);
     background: radial-gradient(circle, rgba(100, 127, 96, 0.08) 0%, rgba(250, 247, 242, 0) 70%);
     pointer-events: none;
     z-index: 0;
 }
 
-img {
+img, video, iframe, embed, object, svg {
     display: block;
     max-width: 100%;
     height: auto;
+}
+
+iframe {
+    border: 0;
 }
 
 a {
@@ -132,6 +147,11 @@ h1, h2, h3, h4, h5, h6 {
     line-height: 1.25;
     font-weight: 600;
     letter-spacing: -0.01em;
+    overflow-wrap: break-word;
+}
+
+p, span {
+    overflow-wrap: break-word;
 }
 
 .script-font {
@@ -146,6 +166,9 @@ h1, h2, h3, h4, h5, h6 {
 .page-shell {
     position: relative;
     z-index: 1;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
 }
 
 .container {
@@ -155,9 +178,17 @@ h1, h2, h3, h4, h5, h6 {
     padding: 0 24px;
 }
 
+@media (max-width: 480px) {
+    .container {
+        padding: 0 16px;
+    }
+}
+
 .section-pad {
     padding: 100px 0;
     position: relative;
+    width: 100%;
+    max-width: 100%;
 }
 
 @media (max-width: 768px) {
@@ -256,6 +287,7 @@ h1, h2, h3, h4, h5, h6 {
     position: relative;
     overflow: hidden;
     text-align: center;
+    max-width: 100%;
 }
 
 .button-primary {
@@ -460,7 +492,10 @@ h1, h2, h3, h4, h5, h6 {
     position: fixed;
     top: 84px;
     left: 0;
+    right: 0;
     width: 100%;
+    max-width: 100vw;
+    box-sizing: border-box;
     height: calc(100vh - 84px);
     background: var(--bg);
     padding: 40px 24px;
@@ -470,6 +505,8 @@ h1, h2, h3, h4, h5, h6 {
     transform: translateY(-100%);
     opacity: 0;
     transition: all 0.35s var(--ease-out);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .mobile-nav.is-open {
@@ -564,6 +601,18 @@ h1, h2, h3, h4, h5, h6 {
     justify-content: center;
     gap: 16px;
     flex-wrap: wrap;
+    max-width: 100%;
+}
+
+@media (max-width: 480px) {
+    .hero-actions {
+        flex-direction: column;
+        width: 100%;
+        gap: 12px;
+    }
+    .hero-actions .button {
+        width: 100%;
+    }
 }
 
 .hero-btn-main {
@@ -633,6 +682,8 @@ h1, h2, h3, h4, h5, h6 {
     border-bottom: 1px solid rgba(100, 127, 96, 0.08);
     padding: 50px 0;
     overflow: hidden;
+    width: 100%;
+    max-width: 100%;
 }
 
 .stats-strip {
@@ -640,6 +691,7 @@ h1, h2, h3, h4, h5, h6 {
     align-items: center;
     justify-content: space-between;
     gap: 20px;
+    width: 100%;
 }
 
 .stat-block {
@@ -650,11 +702,12 @@ h1, h2, h3, h4, h5, h6 {
     align-items: center;
     justify-content: center;
     padding: 10px 16px;
+    min-width: 0;
 }
 
 .stat-value {
     font-family: 'Playfair Display', serif;
-    font-size: clamp(2.4rem, 4.2vw, 3.4rem);
+    font-size: clamp(2.2rem, 4.2vw, 3.4rem);
     font-weight: 700;
     color: var(--sage-dark);
     line-height: 1.08;
@@ -698,13 +751,215 @@ h1, h2, h3, h4, h5, h6 {
         padding: 36px 0;
     }
     .stats-strip {
-        gap: 26px 12px;
+        gap: 20px 8px;
+    }
+    .stat-block {
+        padding: 6px 4px;
     }
     .stat-value {
-        font-size: 2.2rem;
+        font-size: 1.9rem;
     }
     .stat-title {
+        font-size: 0.72rem;
+        letter-spacing: 0.05em;
+    }
+}
+
+/* ----------------------------------------------------------------
+   8.5. SALON IMAGE SHOWCASE SECTION
+   ---------------------------------------------------------------- */
+.salon-showcase-section {
+    background: var(--bg);
+    padding: 70px 0 50px;
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+.salon-showcase-frame {
+    position: relative;
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-lg), 0 12px 36px rgba(100, 127, 96, 0.08);
+    transition: transform 0.6s var(--ease-out), box-shadow 0.6s var(--ease-out), border-color 0.4s ease;
+}
+
+.salon-showcase-frame:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg), 0 20px 50px rgba(100, 127, 96, 0.16);
+    border-color: var(--border-gold);
+}
+
+.salon-showcase-img {
+    width: 100%;
+    height: auto;
+    max-height: 640px;
+    object-fit: cover;
+    display: block;
+    border-radius: calc(var(--radius-xl) - 1px);
+    transition: transform 0.8s ease;
+}
+
+.salon-showcase-frame:hover .salon-showcase-img {
+    transform: scale(1.02);
+}
+
+/* Floating TikTok Social Overlay Card */
+.salon-tiktok-card {
+    position: absolute;
+    bottom: 24px;
+    left: 24px;
+    z-index: 5;
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 18px;
+    background: rgba(250, 247, 242, 0.88);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    box-shadow: 0 12px 30px rgba(30, 40, 31, 0.16), 0 2px 6px rgba(0, 0, 0, 0.05);
+    border-radius: var(--radius-pill);
+    transition: all 0.35s var(--ease-out);
+    max-width: calc(100% - 48px);
+}
+
+.salon-tiktok-card:hover {
+    background: rgba(255, 255, 255, 0.96);
+    transform: translateY(-3px);
+    box-shadow: 0 16px 36px rgba(30, 40, 31, 0.22);
+    border-color: rgba(194, 162, 119, 0.5);
+}
+
+.salon-tiktok-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #111111;
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.05rem;
+    flex-shrink: 0;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s var(--ease-spring);
+}
+
+.salon-tiktok-card:hover .salon-tiktok-icon {
+    transform: rotate(-10deg) scale(1.08);
+}
+
+.salon-tiktok-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.salon-tiktok-label {
+    font-size: 0.66rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--sage-dark);
+    line-height: 1.1;
+}
+
+.salon-tiktok-desc {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: 0;
+}
+
+.salon-tiktok-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 15px;
+    border-radius: var(--radius-pill);
+    background: linear-gradient(135deg, var(--sage) 0%, var(--sage-dark) 100%);
+    color: #FFFFFF;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    flex-shrink: 0;
+    transition: all 0.3s var(--ease-out);
+    box-shadow: 0 4px 12px rgba(100, 127, 96, 0.25);
+}
+
+.salon-tiktok-btn i {
+    font-size: 0.75rem;
+    transition: transform 0.25s ease;
+}
+
+.salon-tiktok-btn:hover {
+    background: linear-gradient(135deg, var(--sage-light) 0%, var(--sage) 100%);
+    color: #FFFFFF;
+    transform: translateX(2px);
+    box-shadow: 0 6px 16px rgba(100, 127, 96, 0.35);
+}
+
+.salon-tiktok-btn:hover i {
+    transform: translateX(3px);
+}
+
+@media (max-width: 768px) {
+    .salon-showcase-section {
+        padding: 45px 0 35px;
+    }
+    .salon-showcase-img {
+        max-height: 420px;
+    }
+    .salon-tiktok-card {
+        bottom: 16px;
+        left: 16px;
+        max-width: calc(100% - 32px);
+    }
+}
+
+@media (max-width: 600px) {
+    .salon-tiktok-card {
+        bottom: 12px;
+        left: 12px;
+        padding: 8px 12px;
+        gap: 10px;
+        max-width: calc(100% - 24px);
+    }
+    .salon-tiktok-icon {
+        width: 30px;
+        height: 30px;
+        font-size: 0.9rem;
+    }
+    .salon-tiktok-label {
+        font-size: 0.6rem;
+    }
+    .salon-tiktok-desc {
         font-size: 0.76rem;
+    }
+    .salon-tiktok-btn {
+        padding: 6px 11px;
+        font-size: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .salon-showcase-section {
+        padding: 35px 0 25px;
+    }
+    .salon-showcase-frame {
+        border-radius: var(--radius-lg);
+    }
+    .salon-showcase-img {
+        max-height: 280px;
+        border-radius: calc(var(--radius-lg) - 1px);
     }
 }
 
@@ -718,8 +973,15 @@ h1, h2, h3, h4, h5, h6 {
 
 .service-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
     gap: 28px;
+}
+
+@media (max-width: 640px) {
+    .service-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
 }
 
 .service-card {
@@ -734,6 +996,13 @@ h1, h2, h3, h4, h5, h6 {
     justify-content: space-between;
     position: relative;
     overflow: hidden;
+    max-width: 100%;
+}
+
+@media (max-width: 480px) {
+    .service-card {
+        padding: 26px 18px;
+    }
 }
 
 .service-card::before {
@@ -817,8 +1086,15 @@ h1, h2, h3, h4, h5, h6 {
 
 .team-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
     gap: 32px;
+}
+
+@media (max-width: 640px) {
+    .team-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
 }
 
 .team-card {
@@ -829,6 +1105,7 @@ h1, h2, h3, h4, h5, h6 {
     box-shadow: var(--shadow-sm);
     transition: all 0.35s var(--ease-out);
     text-align: center;
+    max-width: 100%;
 }
 
 .team-card:hover {
@@ -902,8 +1179,15 @@ h1, h2, h3, h4, h5, h6 {
 
 .testimonial-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
     gap: 28px;
+}
+
+@media (max-width: 640px) {
+    .testimonial-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
 }
 
 .testimonial-card {
@@ -914,6 +1198,13 @@ h1, h2, h3, h4, h5, h6 {
     box-shadow: var(--shadow-sm);
     position: relative;
     transition: all 0.3s ease;
+    max-width: 100%;
+}
+
+@media (max-width: 480px) {
+    .testimonial-card {
+        padding: 24px 18px;
+    }
 }
 
 .testimonial-card:hover {
@@ -989,8 +1280,15 @@ h1, h2, h3, h4, h5, h6 {
 
 .gallery-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
     gap: 20px;
+}
+
+@media (max-width: 640px) {
+    .gallery-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
 }
 
 .gallery-card {
@@ -1000,6 +1298,7 @@ h1, h2, h3, h4, h5, h6 {
     box-shadow: var(--shadow-sm);
     height: 320px;
     border: 1px solid var(--border);
+    max-width: 100%;
 }
 
 .gallery-card img {
@@ -1050,6 +1349,7 @@ h1, h2, h3, h4, h5, h6 {
     flex-direction: column;
     gap: 16px;
     margin: 28px 0;
+    min-width: 0;
 }
 
 .contact-link, .contact-meta {
@@ -1058,6 +1358,9 @@ h1, h2, h3, h4, h5, h6 {
     gap: 14px;
     font-size: 1.05rem;
     color: var(--text);
+    min-width: 0;
+    overflow-wrap: anywhere;
+    word-break: break-word;
 }
 
 .contact-link i, .contact-meta i {
@@ -1079,10 +1382,18 @@ h1, h2, h3, h4, h5, h6 {
     border: 1px solid var(--border);
     padding: 40px;
     box-shadow: var(--shadow-lg);
+    max-width: 100%;
+}
+
+.contact-form {
+    width: 100%;
+    max-width: 100%;
 }
 
 .contact-form p {
     margin-bottom: 20px;
+    width: 100%;
+    max-width: 100%;
 }
 
 .contact-form label {
@@ -1095,6 +1406,8 @@ h1, h2, h3, h4, h5, h6 {
 
 .form-control, .form-select, input[type="text"], input[type="email"], input[type="tel"], input[type="date"], select, textarea {
     width: 100%;
+    max-width: 100%;
+    min-width: 0;
     padding: 13px 18px;
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
@@ -1104,6 +1417,7 @@ h1, h2, h3, h4, h5, h6 {
     font-size: 0.95rem;
     outline: none;
     transition: all 0.25s ease;
+    box-sizing: border-box;
 }
 
 .form-control:focus, .form-select:focus, input:focus, select:focus, textarea:focus {
@@ -1115,6 +1429,13 @@ h1, h2, h3, h4, h5, h6 {
 @media (max-width: 860px) {
     .contact-grid {
         grid-template-columns: 1fr;
+        gap: 36px;
+    }
+}
+
+@media (max-width: 480px) {
+    .contact-card {
+        padding: 24px 18px;
     }
 }
 
@@ -1255,10 +1576,13 @@ h1, h2, h3, h4, h5, h6 {
     min-height: 420px;
     height: 100%;
     display: flex;
+    width: 100%;
+    max-width: 100%;
 }
 
 .location-map-iframe {
     width: 100%;
+    max-width: 100%;
     height: 100%;
     min-height: 420px;
     border: 0;
@@ -1272,10 +1596,16 @@ h1, h2, h3, h4, h5, h6 {
     }
     .location-map-wrap,
     .location-map-iframe {
-        min-height: 350px;
+        min-height: 320px;
     }
     .location-card {
-        padding: 30px 22px;
+        padding: 28px 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .location-card {
+        padding: 22px 16px;
     }
 }
 
@@ -1399,12 +1729,13 @@ h1, h2, h3, h4, h5, h6 {
     padding: 44px;
     box-shadow: var(--shadow-lg);
     max-width: 860px;
+    width: 100%;
     margin: 0 auto;
 }
 
 @media (max-width: 600px) {
     .booking-card {
-        padding: 26px 20px;
+        padding: 24px 16px;
     }
 }
 
@@ -1667,7 +1998,19 @@ h1, h2, h3, h4, h5, h6 {
 .reveal-right.is-visible,
 .reveal-scale.is-visible {
     opacity: 1;
-    transform: translate(0) scale(1);
+    transform: translate(0, 0) scale(1);
+}
+
+/* Eliminate horizontal off-screen translation on mobile/tablet viewports to prevent side-scrolling */
+@media (max-width: 768px) {
+    .reveal-left,
+    .reveal-right {
+        transform: translateY(24px);
+    }
+    .reveal-left.is-visible,
+    .reveal-right.is-visible {
+        transform: translateY(0);
+    }
 }
 
 /* ----------------------------------------------------------------

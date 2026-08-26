@@ -1,0 +1,37 @@
+{% load static %}
+
+<!-- ================================================================
+     SALON IMAGE SHOWCASE SECTION
+     To update with your own salon photo, replace: static/images/salon-showcase.jpg
+     or update the src URL below with your custom image path.
+     ================================================================ -->
+<section class="salon-showcase-section" aria-label="Salon Interior Showcase">
+    <div class="container">
+        <div class="salon-showcase-frame reveal-scale">
+            <!-- [SALON PHOTO] Replace src with your salon interior image if needed -->
+            <img src="{% static 'images/salon-showcase.jpg' %}" 
+                 alt="Ava's Glow Studio Luxury Salon Interior" 
+                 class="salon-showcase-img"
+                 loading="lazy">
+
+            <!-- Floating TikTok Social Overlay Card -->
+            <div class="salon-tiktok-card">
+                <div class="salon-tiktok-icon" aria-hidden="true">
+                    <i class="fa-brands fa-tiktok"></i>
+                </div>
+                <div class="salon-tiktok-text">
+                    <span class="salon-tiktok-label">TikTok</span>
+                    <p class="salon-tiktok-desc">Follow our journey on TikTok</p>
+                </div>
+                <a href="{{ shop.tiktok|default:'https://tiktok.com/@avasglowstudio' }}" 
+                   target="_blank" 
+                   rel="noopener noreferrer" 
+                   class="salon-tiktok-btn" 
+                   aria-label="Follow Ava's Glow Studio on TikTok">
+                    <span>Follow</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
