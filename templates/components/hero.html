@@ -1,4 +1,4 @@
-{% load static %}
+﻿{% load static %}
 
 <section class="hero" style="background-image: url('{% static 'images/hero.jpg' %}');">
     <div class="container hero-container">
@@ -19,6 +19,9 @@
                 </a>
                 <a class="button button-ghost" href="#location">
                     <i class="fa-solid fa-location-dot"></i> Location
+                </a>
+                <a class="button button-ghost" href="{% url 'track_booking' %}">
+                    <i class="fa-solid fa-magnifying-glass"></i> Track My Booking
                 </a>
             </div>
         </div>

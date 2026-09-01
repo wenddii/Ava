@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     "cloudinary_storage",
 
     "website",
+    "dashboard",
 
     "telegram_bot",
 ]

@@ -74,3 +74,17 @@ def generate_available_slots(selected_date, service_duration=30, barber_id=None)
             })
 
     return available_slots
+
+
+def normalize_phone_number(phone_str):
+    """
+    Normalizes Ethiopian phone number strings for matching.
+    """
+    if not phone_str:
+        return ""
+    digits = "".join([c for c in phone_str if c.isdigit()])
+    if digits.startswith("251") and len(digits) == 12:
+        digits = "0" + digits[3:]
+    elif len(digits) == 9 and digits[0] in ["9", "7"]:
+        digits = "0" + digits
+    return digits

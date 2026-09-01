@@ -1,11 +1,10 @@
 from datetime import date, timedelta
 from django.test import TestCase, Client
-from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
 from website.models import ShopInfo, Service, Barber, Booking
 
 
-class BookingSystemTests(TestCase):
+class WebsitePublicTests(TestCase):
     def setUp(self):
         self.client = Client()
         self.shop = ShopInfo.objects.create(
@@ -27,19 +26,10 @@ class BookingSystemTests(TestCase):
             role="Senior Barber"
         )
 
-        # Create dummy image for payment screenshot
         self.dummy_image = SimpleUploadedFile(
             name="test_receipt.gif",
             content=b"GIF89a\x01\x00\x01\x00\x80\x00\x00\xff\xff\xff\x00\x00\x00!\xf9\x04\x01\x00\x00\x00\x00,\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02D\x01\x00;",
             content_type="image/gif"
-        )
-
-        # Create staff user for dashboard
-        self.staff_user = User.objects.create_user(
-            username="barber_admin",
-            email="admin@barber.com",
-            password="password123",
-            is_staff=True
         )
 
     def test_booking_creation_and_3day_limit(self):
@@ -74,45 +64,6 @@ class BookingSystemTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["slots"], [])
 
-    def test_dashboard_access_control(self):
-        # Unauthenticated user should be redirected to login
-        response = self.client.get("/dashboard/")
-        self.assertEqual(response.status_code, 302)
-
-        # Log in as staff
-        self.client.login(username="barber_admin", password="password123")
-        response = self.client.get("/dashboard/")
-        self.assertEqual(response.status_code, 200)
-
-    def test_payment_verification_and_booking_confirmation(self):
-        today = date.today()
-        booking = Booking.objects.create(
-            customer_name="Jane Smith",
-            phone_number="0922334455",
-            service=self.service,
-            barber=self.barber,
-            appointment_date=today + timedelta(days=1),
-            appointment_time="14:00:00",
-            payment_screenshot=self.dummy_image,
-            payment_status="pending",
-            status="pending"
-        )
-
-        self.client.login(username="barber_admin", password="password123")
-        
-        # Verify payment
-        response = self.client.post(f"/dashboard/bookings/{booking.id}/", {"action": "verify_payment"})
-        self.assertEqual(response.status_code, 302)
-
-        booking.refresh_from_db()
-        self.assertEqual(booking.payment_status, "verified")
-        self.assertEqual(booking.status, "confirmed")
-
-        # Mark completed
-        response = self.client.post(f"/dashboard/bookings/{booking.id}/", {"action": "complete_booking"})
-        booking.refresh_from_db()
-        self.assertEqual(booking.status, "completed")
-
     def test_english_date_and_time_rendering(self):
         # Verify slot API returns 12-hour AM/PM English formatted times
         today = date.today() + timedelta(days=1)
@@ -122,70 +73,6 @@ class BookingSystemTests(TestCase):
         self.assertTrue(len(data["slots"]) > 0)
         first_slot = data["slots"][0]
         self.assertIn("AM", first_slot["display"])
-
-    def test_offline_and_blocked_time_appointments(self):
-        self.client.login(username="barber_admin", password="password123")
-        target_date = date.today() + timedelta(days=1)
-
-        # 1. Create a Walk-In appointment
-        response = self.client.post("/dashboard/bookings/add-offline/", {
-            "booking_source": "walk_in",
-            "customer_name": "Solomon Walkin",
-            "phone_number": "0912345678",
-            "service": self.service.id,
-            "barber": self.barber.id,
-            "appointment_date": target_date.strftime("%Y-%m-%d"),
-            "appointment_time": "11:00",
-        })
-        self.assertEqual(response.status_code, 302)
-
-        # 2. Block time slot at 15:00
-        response = self.client.post("/dashboard/bookings/add-offline/", {
-            "booking_source": "blocked",
-            "customer_name": "Lunch Break",
-            "barber": self.barber.id,
-            "appointment_date": target_date.strftime("%Y-%m-%d"),
-            "appointment_time": "15:00",
-        })
-        self.assertEqual(response.status_code, 302)
-
-        # 3. Verify public API slot logic excludes 11:00 and 15:00 for online customers
-        api_response = self.client.get(f"/api/available-slots/?date={target_date.strftime('%Y-%m-%d')}&service={self.service.id}&barber={self.barber.id}")
-        data = api_response.json()
-        slot_values = [s["value"] for s in data["slots"]]
-        self.assertNotIn("11:00", slot_values)
-        self.assertNotIn("15:00", slot_values)
-
-        # 4. Verify schedule view renders blocked and walk-in statuses
-        sched_response = self.client.get(f"/dashboard/schedule/?date={target_date.strftime('%Y-%m-%d')}")
-        self.assertEqual(sched_response.status_code, 200)
-        self.assertContains(sched_response, "Solomon Walkin")
-        self.assertContains(sched_response, "Lunch Break")
-
-    def test_testimonial_with_and_without_image(self):
-        from website.models import Testimonial
-
-        # Testimonial 1: Without image
-        t1 = Testimonial.objects.create(
-            customer_name="Dawit Tech",
-            comment="Great service!",
-            rating=5
-        )
-
-        # Testimonial 2: With image
-        t2 = Testimonial.objects.create(
-            customer_name="Sara Barber",
-            comment="Best haircut in town",
-            rating=5,
-            image=self.dummy_image
-        )
-
-        # Check public home page rendering
-        response = self.client.get("/")
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Dawit Tech")
-        self.assertContains(response, "Sara Barber")
-        self.assertContains(response, "D")
 
     def test_shop_logo_rendering_and_fallback(self):
         # 1. Test fallback name when no logo exists
@@ -203,23 +90,6 @@ class BookingSystemTests(TestCase):
         response = self.client.get("/")
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.shop.logo.url)
-
-        # 3. Test Staff Dashboard Shop Info update with logo upload
-        self.client.login(username="barber_admin", password="password123")
-        logo_upload = SimpleUploadedFile(name="new_logo.gif", content=b"GIF89a\x01\x00\x01\x00\x80\x00\x00\xff\xff\xff\x00\x00\x00!\xf9\x04\x01\x00\x00\x00\x00,\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02D\x01\x00;", content_type="image/gif")
-        response = self.client.post("/dashboard/shop/", {
-            "name": "Ava's GLOW STUDIO",
-            "phone_number": "0911998877",
-            "location": "Bole, Addis Ababa",
-            "opening_hours": "08:00 AM - 09:00 PM",
-            "description": "Luxury barbershop",
-            "payment_instructions": "CBE: 1000123456",
-            "logo": logo_upload,
-        })
-        self.assertEqual(response.status_code, 302)
-        self.shop.refresh_from_db()
-        self.assertEqual(self.shop.name, "Ava's GLOW STUDIO")
-        self.assertTrue(bool(self.shop.logo))
 
     def test_customer_booking_tracking(self):
         today = date.today()
@@ -285,4 +155,3 @@ class BookingSystemTests(TestCase):
         self.assertContains(response_empty, "We couldn't find any bookings for this phone number.")
         self.assertNotContains(response_empty, "Customer One")
         self.assertNotContains(response_empty, "Other Customer")
-

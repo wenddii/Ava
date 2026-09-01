@@ -785,6 +785,10 @@ p, span {
     border: 1px solid var(--border);
     box-shadow: var(--shadow-lg), 0 12px 36px rgba(100, 127, 96, 0.08);
     transition: transform 0.6s var(--ease-out), box-shadow 0.6s var(--ease-out), border-color 0.4s ease;
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    box-sizing: border-box;
 }
 
 .salon-showcase-frame:hover {
@@ -913,10 +917,15 @@ p, span {
 
 @media (max-width: 768px) {
     .salon-showcase-section {
-        padding: 45px 0 35px;
+        padding: 50px 0 40px;
+    }
+    .salon-showcase-frame {
+        border-radius: 28px;
+        box-shadow: 0 14px 38px rgba(34, 46, 35, 0.08), 0 4px 14px rgba(194, 162, 119, 0.10);
     }
     .salon-showcase-img {
-        max-height: 420px;
+        max-height: 400px;
+        border-radius: calc(28px - 1px);
     }
     .salon-tiktok-card {
         bottom: 16px;
@@ -927,11 +936,11 @@ p, span {
 
 @media (max-width: 600px) {
     .salon-tiktok-card {
-        bottom: 12px;
-        left: 12px;
+        bottom: 14px;
+        left: 14px;
         padding: 8px 12px;
         gap: 10px;
-        max-width: calc(100% - 24px);
+        max-width: calc(100% - 28px);
     }
     .salon-tiktok-icon {
         width: 30px;
@@ -952,14 +961,57 @@ p, span {
 
 @media (max-width: 480px) {
     .salon-showcase-section {
-        padding: 35px 0 25px;
+        padding: 48px 0 38px;
     }
     .salon-showcase-frame {
-        border-radius: var(--radius-lg);
+        width: 95%;
+        max-width: 95%;
+        margin: 0 auto;
+        padding: 8px;
+        border-radius: 28px;
+        background: var(--bg-card);
+        border: 1px solid rgba(194, 162, 119, 0.28);
+        box-shadow: 0 12px 32px rgba(34, 46, 35, 0.07), 0 4px 12px rgba(194, 162, 119, 0.08);
     }
     .salon-showcase-img {
+        height: 250px;
         max-height: 280px;
-        border-radius: calc(var(--radius-lg) - 1px);
+        aspect-ratio: 4 / 3;
+        border-radius: 20px;
+        object-fit: cover;
+    }
+    .salon-tiktok-card {
+        bottom: 18px;
+        left: 18px;
+        max-width: calc(100% - 36px);
+        background: rgba(250, 247, 242, 0.92);
+        box-shadow: 0 8px 24px rgba(30, 40, 31, 0.14);
+    }
+}
+
+@media (max-width: 360px) {
+    .salon-showcase-section {
+        padding: 40px 0 32px;
+    }
+    .salon-showcase-frame {
+        width: 96%;
+        max-width: 96%;
+        padding: 6px;
+        border-radius: 24px;
+    }
+    .salon-showcase-img {
+        height: 220px;
+        border-radius: 18px;
+    }
+    .salon-tiktok-card {
+        bottom: 14px;
+        left: 14px;
+        max-width: calc(100% - 28px);
+        padding: 6px 10px;
+        gap: 8px;
+    }
+    .salon-tiktok-desc {
+        font-size: 0.72rem;
     }
 }
 
