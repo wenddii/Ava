@@ -34,16 +34,33 @@
                         <span class="receipt-value" style="color: var(--sage-dark);">#{{ booking.id }}</span>
                     </div>
 
-                    <div class="receipt-row">
-                        <span class="receipt-label">Signature Service</span>
-                        <span class="receipt-value">{{ booking.service.name }}</span>
-                    </div>
+                    {% if booking.appointment_services.all %}
+                        {% for item in booking.appointment_services.all %}
+                            <div class="receipt-row">
+                                <span class="receipt-label">Service {{ forloop.counter }}</span>
+                                <span class="receipt-value">{{ item.service.name }} · {{ item.duration }} min · {{ item.price }} ETB</span>
+                            </div>
+                            <div class="receipt-row">
+                                <span class="receipt-label">Dedicated Specialist</span>
+                                <span class="receipt-value">{{ item.barber.name|default:"Assigned by Studio" }}</span>
+                            </div>
+                        {% endfor %}
+                        <div class="receipt-row">
+                            <span class="receipt-label">Total</span>
+                            <span class="receipt-value">{{ booking.total_duration }} min · {{ booking.total_price }} ETB</span>
+                        </div>
+                    {% else %}
+                        <div class="receipt-row">
+                            <span class="receipt-label">Signature Service</span>
+                            <span class="receipt-value">{{ booking.service.name }}</span>
+                        </div>
 
-                    {% if booking.barber %}
-                    <div class="receipt-row">
-                        <span class="receipt-label">Dedicated Specialist</span>
-                        <span class="receipt-value">{{ booking.barber.name }}</span>
-                    </div>
+                        {% if booking.barber %}
+                        <div class="receipt-row">
+                            <span class="receipt-label">Dedicated Specialist</span>
+                            <span class="receipt-value">{{ booking.barber.name }}</span>
+                        </div>
+                        {% endif %}
                     {% endif %}
 
                     <div class="receipt-row">

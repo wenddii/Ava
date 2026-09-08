@@ -1,4 +1,6 @@
 from datetime import date, datetime, timedelta
+import json
+from django.db import transaction
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.contrib import messages
@@ -13,8 +15,9 @@ from .models import (
     Barber,
     Testimonial,
     Booking,
+    AppointmentService,
 )
-from .utils import generate_available_slots, normalize_phone_number
+from .utils import generate_available_slots, generate_sequential_available_slots, normalize_phone_number
 
 
 def home(request):
@@ -48,14 +51,38 @@ def available_slots_api(request):
     date_str = request.GET.get("date")
     service_id = request.GET.get("service")
     barber_id = request.GET.get("barber")
+    assignments_raw = request.GET.get("assignments")
 
-    if not date_str or not service_id:
+    if not date_str:
         return JsonResponse({"slots": [], "error": "Date and Service are required."})
 
     try:
         selected_date = datetime.strptime(date_str, "%Y-%m-%d").date()
     except ValueError:
         return JsonResponse({"slots": [], "error": "Invalid date format."})
+
+    if not service_id and not assignments_raw:
+        return JsonResponse({
+            "slots": generate_available_slots(selected_date, 30, None),
+            "date": date_str,
+            "today": date.today().strftime("%Y-%m-%d"),
+            "max_date": (date.today() + timedelta(days=3)).strftime("%Y-%m-%d"),
+        })
+
+    if assignments_raw:
+        try:
+            assignments = json.loads(assignments_raw)
+            if not isinstance(assignments, list) or not assignments:
+                raise ValueError
+            assignment_rows = _validated_assignments(assignments)
+        except (TypeError, ValueError, json.JSONDecodeError) as exc:
+            return JsonResponse({"slots": [], "error": str(exc) or "Invalid service selection."}, status=400)
+        return JsonResponse({
+            "slots": generate_sequential_available_slots(selected_date, assignment_rows),
+            "date": date_str,
+            "today": date.today().strftime("%Y-%m-%d"),
+            "max_date": (date.today() + timedelta(days=3)).strftime("%Y-%m-%d"),
+        })
 
     try:
         service = Service.objects.get(id=service_id)
@@ -83,6 +110,59 @@ def available_slots_api(request):
     })
 
 
+def _validated_assignments(assignments):
+    rows = []
+    seen_services = set()
+    for item in assignments:
+        try:
+            service_id = int(item["service_id"])
+        except (KeyError, TypeError, ValueError):
+            raise ValueError("Please select a service.")
+        if service_id in seen_services:
+            raise ValueError("A service can only be selected once.")
+        seen_services.add(service_id)
+        try:
+            service = Service.objects.get(pk=service_id)
+        except Service.DoesNotExist:
+            raise ValueError("Please select a valid service.")
+
+        barber_id = item.get("barber_id")
+        barber = None
+        if barber_id not in (None, "", 0, "0"):
+            try:
+                barber = Barber.objects.get(pk=int(barber_id), is_available=True)
+            except (Barber.DoesNotExist, TypeError, ValueError):
+                raise ValueError("Please select a stylist.")
+
+        assigned_barbers = service.barbers.filter(is_available=True)
+        if not assigned_barbers.filter(pk=barber.pk if barber else None).exists():
+            raise ValueError("This stylist is unavailable for this service.")
+
+        rows.append({
+            "service": service,
+            "barber": barber,
+            "barber_id": barber.pk if barber else None,
+            "duration": service.duration,
+        })
+    return rows
+
+
+def eligible_barbers_api(request):
+    service_id = request.GET.get("service")
+    try:
+        service = Service.objects.get(pk=service_id)
+    except (Service.DoesNotExist, TypeError, ValueError):
+        return JsonResponse({"barbers": [], "error": "Please select a valid service."}, status=400)
+
+    assigned = Barber.objects.filter(is_available=True, services=service).order_by("name")
+
+    return JsonResponse({
+        "service": {"id": service.id, "name": service.name, "duration": service.duration, "price": str(service.price)},
+        "fallback": False,
+        "barbers": [{"id": barber.id, "name": barber.name, "role": barber.role} for barber in assigned],
+    })
+
+
 def booking_create(request):
     shop = ShopInfo.objects.first()
     services = Service.objects.all()
@@ -94,9 +174,40 @@ def booking_create(request):
     initial_barber = request.GET.get("barber")
 
     if request.method == "POST":
-        form = BookingForm(request.POST, request.FILES)
+        post_data = request.POST.copy()
+        assignments_raw = post_data.get("appointment_services", "")
+        try:
+            assignments = json.loads(assignments_raw) if assignments_raw else []
+            if not assignments:
+                assignments = [{
+                    "service_id": post_data.get("service"),
+                    "barber_id": post_data.get("barber") or None,
+                }]
+            assignment_rows = _validated_assignments(assignments)
+            first_row = assignment_rows[0]
+            post_data["service"] = first_row["service"].id
+            post_data["barber"] = first_row["barber"].id if first_row["barber"] else ""
+        except (TypeError, ValueError, json.JSONDecodeError) as exc:
+            assignment_rows = []
+            assignment_error = str(exc) or "Please select a service and stylist."
+        else:
+            assignment_error = ""
 
-        if form.is_valid():
+        form = BookingForm(post_data, request.FILES)
+
+        if assignment_error:
+            form.add_error(None, assignment_error)
+        if form.is_valid() and assignment_rows:
+            start_time = form.cleaned_data["appointment_time"]
+            start_value = start_time.strftime("%H:%M")
+            availability = generate_sequential_available_slots(
+                form.cleaned_data["appointment_date"],
+                assignment_rows,
+            )
+            if not any(slot["value"] == start_value for slot in availability):
+                form.add_error("appointment_time", "This stylist is not available for the selected time.")
+
+        if form.is_valid() and assignment_rows:
             booking = form.save(commit=False)
 
             # Booking status
@@ -107,7 +218,23 @@ def booking_create(request):
             booking.telegram_chat_id = None
             booking.telegram_reminder_enabled = False
 
-            booking.save()
+            with transaction.atomic():
+                booking.save()
+                cursor = booking.appointment_time
+                for sequence, row in enumerate(assignment_rows, start=1):
+                    start_dt = datetime.combine(booking.appointment_date, cursor)
+                    end_dt = start_dt + timedelta(minutes=row["duration"])
+                    AppointmentService.objects.create(
+                        booking=booking,
+                        service=row["service"],
+                        barber=row["barber"],
+                        sequence=sequence,
+                        duration=row["duration"],
+                        price=row["service"].price,
+                        start_time=start_dt.time(),
+                        end_time=end_dt.time(),
+                    )
+                    cursor = end_dt.time()
 
             messages.success(
                 request,

@@ -1,4 +1,5 @@
 from datetime import date, datetime, time, timedelta
+from django.db.models import Q
 from django.utils import timezone
 
 
@@ -74,6 +75,97 @@ def generate_available_slots(selected_date, service_duration=30, barber_id=None)
             })
 
     return available_slots
+
+
+def _active_booking_intervals(selected_date, barber_id=None):
+    from website.models import AppointmentService, Booking
+
+    active_statuses = ["pending", "confirmed"]
+    segment_booking_ids = set(
+        AppointmentService.objects.filter(
+            booking__appointment_date=selected_date,
+            booking__status__in=active_statuses,
+        ).values_list("booking_id", flat=True)
+    )
+    segments = AppointmentService.objects.filter(
+        booking__appointment_date=selected_date,
+        booking__status__in=active_statuses,
+    )
+    if barber_id:
+        segments = segments.filter(barber_id=barber_id)
+    elif barber_id is None:
+        segments = segments.filter(barber__isnull=True)
+
+    intervals = [
+        (
+            datetime.combine(selected_date, segment.start_time),
+            datetime.combine(selected_date, segment.end_time),
+        )
+        for segment in segments
+    ]
+
+    legacy_bookings = Booking.objects.filter(
+        appointment_date=selected_date,
+        status__in=active_statuses,
+    ).exclude(id__in=segment_booking_ids)
+    if barber_id:
+        legacy_bookings = legacy_bookings.filter(Q(barber_id=barber_id) | Q(barber__isnull=True))
+    else:
+        legacy_bookings = legacy_bookings.filter(barber__isnull=True)
+
+    for booking in legacy_bookings.select_related("service"):
+        duration = booking.service.duration if booking.service else 30
+        start = datetime.combine(selected_date, booking.appointment_time)
+        intervals.append((start, start + timedelta(minutes=duration)))
+
+    return intervals
+
+
+def generate_sequential_available_slots(selected_date, assignments):
+    """Return starts that fit every ordered service segment and assigned barber."""
+    today = date.today()
+    max_date = today + timedelta(days=3)
+    if selected_date < today or selected_date > max_date or not assignments:
+        return []
+
+    now_dt = datetime.now()
+    opening = datetime.combine(selected_date, time(9, 0))
+    closing = datetime.combine(selected_date, time(20, 0))
+    candidates = []
+    current = opening
+    while current < closing:
+        if selected_date != today or current > now_dt:
+            candidates.append(current)
+        current += timedelta(minutes=30)
+
+    intervals_by_barber = {}
+    for assignment in assignments:
+        barber_id = assignment.get("barber_id")
+        if barber_id not in intervals_by_barber:
+            intervals_by_barber[barber_id] = _active_booking_intervals(selected_date, barber_id)
+
+    available = []
+    for start in candidates:
+        cursor = start
+        valid = True
+        for assignment in assignments:
+            segment_end = cursor + timedelta(minutes=assignment["duration"])
+            if segment_end > closing:
+                valid = False
+                break
+            for booked_start, booked_end in intervals_by_barber[assignment.get("barber_id")]:
+                if max(cursor, booked_start) < min(segment_end, booked_end):
+                    valid = False
+                    break
+            if not valid:
+                break
+            cursor = segment_end
+        if valid:
+            available.append({
+                "value": start.strftime("%H:%M"),
+                "display": start.strftime("%I:%M %p").lstrip("0"),
+            })
+    return available
 
 
 def normalize_phone_number(phone_str):

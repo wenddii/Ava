@@ -60,10 +60,11 @@ class GalleryImageForm(forms.ModelForm):
 class BarberForm(forms.ModelForm):
     class Meta:
         model = Barber
-        fields = ["name", "role", "photo", "bio"]
+        fields = ["name", "role", "services", "photo", "bio"]
         widgets = {
             "name": forms.TextInput(attrs={"class": "form-control"}),
             "role": forms.TextInput(attrs={"class": "form-control"}),
+            "services": forms.CheckboxSelectMultiple(),
             "photo": forms.FileInput(attrs={"class": "form-control", "accept": "image/*"}),
             "bio": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
         }

@@ -153,6 +153,19 @@
             </div>
 
             <div class="dash-form-group">
+                <label class="dash-form-label">Services they provide</label>
+                <div style="display: grid; gap: 8px; padding: 12px; border: 1px solid var(--border-color); border-radius: 6px;">
+                    {% for checkbox in form.services %}
+                        <label style="display: flex; align-items: center; gap: 8px; color: var(--text-muted); cursor: pointer;">
+                            {{ checkbox.tag }} <span>{{ checkbox.choice_label }}</span>
+                        </label>
+                    {% empty %}
+                        <span style="color: var(--text-muted);">Add services first to assign them to staff.</span>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="dash-form-group">
                 <label class="dash-form-label">Photo</label>
                 {{ form.photo }}
             </div>

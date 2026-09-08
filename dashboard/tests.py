@@ -79,6 +79,46 @@ class DashboardTests(TestCase):
         booking.refresh_from_db()
         self.assertEqual(booking.status, "completed")
 
+    def test_booking_update_returns_to_dashboard_referrer(self):
+        booking = Booking.objects.create(
+            customer_name="Jane Smith",
+            phone_number="0922334455",
+            service=self.service,
+            barber=self.barber,
+            appointment_date=date.today() + timedelta(days=1),
+            appointment_time="14:00:00",
+            payment_screenshot=self.dummy_image,
+            payment_status="pending",
+            status="pending"
+        )
+        self.client.login(username="barber_admin", password="password123")
+
+        self.client.get(
+            f"/dashboard/bookings/{booking.id}/",
+            HTTP_REFERER="http://testserver/dashboard/",
+        )
+        response = self.client.post(
+            f"/dashboard/bookings/{booking.id}/",
+            {"action": "complete_booking"},
+        )
+        self.assertEqual(response.url, "/dashboard/")
+
+        self.client.get(
+            f"/dashboard/bookings/{booking.id}/",
+            HTTP_REFERER="http://testserver/dashboard/bookings/?status=pending",
+        )
+        response = self.client.post(
+            f"/dashboard/bookings/{booking.id}/",
+            {"action": "cancel_booking"},
+        )
+        self.assertEqual(response.url, "/dashboard/bookings/?status=pending")
+
+        response = self.client.post(
+            f"/dashboard/bookings/{booking.id}/",
+            {"action": "complete_booking"},
+        )
+        self.assertEqual(response.url, "/dashboard/bookings/")
+
     def test_offline_and_blocked_time_appointments(self):
         self.client.login(username="barber_admin", password="password123")
         target_date = date.today() + timedelta(days=1)
@@ -132,6 +172,44 @@ class DashboardTests(TestCase):
         self.assertEqual(self.shop.name, "Ava's GLOW STUDIO")
         self.assertTrue(bool(self.shop.logo))
 
+    def test_staff_services_can_be_added_edited_shared_and_removed(self):
+        beard_trim = Service.objects.create(
+            name="Beard Trim",
+            description="Beard trim",
+            price=150.00,
+            duration=20,
+        )
+        second_barber = Barber.objects.create(name="Sara", role="Stylist")
+        self.client.login(username="barber_admin", password="password123")
+
+        response = self.client.post("/dashboard/barbers/", {
+            "name": "Abraham",
+            "role": "Senior Barber",
+            "services": [self.service.id, beard_trim.id],
+        })
+        self.assertEqual(response.status_code, 302)
+        assigned_barber = Barber.objects.get(name="Abraham")
+        self.assertEqual(set(assigned_barber.services.values_list("id", flat=True)), {self.service.id, beard_trim.id})
+
+        response = self.client.get(f"/dashboard/barbers/?edit={assigned_barber.id}")
+        self.assertContains(response, f'name="services" value="{self.service.id}" checked')
+        self.assertContains(response, f'name="services" value="{beard_trim.id}" checked')
+
+        response = self.client.post(f"/dashboard/barbers/?edit={assigned_barber.id}", {
+            "name": assigned_barber.name,
+            "role": assigned_barber.role,
+            "services": [beard_trim.id],
+        })
+        self.assertEqual(response.status_code, 302)
+        assigned_barber.refresh_from_db()
+        self.assertEqual(list(assigned_barber.services.values_list("id", flat=True)), [beard_trim.id])
+
+        second_barber.services.add(beard_trim)
+        data = self.client.get("/dashboard/barbers/data/").json()
+        barber_data = {item["id"]: item for item in data["barbers"]}
+        self.assertEqual(barber_data[assigned_barber.id]["service_ids"], [beard_trim.id])
+        self.assertEqual(barber_data[second_barber.id]["service_ids"], [beard_trim.id])
+
     def test_dashboard_url_reversal(self):
         from django.urls import reverse
         self.assertEqual(reverse("dashboard_index"), "/dashboard/")
@@ -147,5 +225,6 @@ class DashboardTests(TestCase):
         self.assertEqual(reverse("dashboard_gallery_delete", args=[1]), "/dashboard/gallery/delete/1/")
         self.assertEqual(reverse("dashboard_shop_info"), "/dashboard/shop/")
         self.assertEqual(reverse("dashboard_barbers"), "/dashboard/barbers/")
+        self.assertEqual(reverse("dashboard_barbers_data"), "/dashboard/barbers/data/")
         self.assertEqual(reverse("dashboard_barber_delete", args=[1]), "/dashboard/barbers/delete/1/")
         self.assertEqual(reverse("dashboard_barber_toggle_availability", args=[1]), "/dashboard/barbers/1/toggle-availability/")

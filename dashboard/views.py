@@ -1,10 +1,13 @@
 from datetime import date, datetime, timedelta
 from django.shortcuts import render, redirect, get_object_or_404
+from django.http import JsonResponse
 from django.contrib.auth import login, logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
-from django.db.models import Q
+from django.db.models import Q, Count, Max
+from django.utils.http import url_has_allowed_host_and_scheme
+from urllib.parse import urlsplit
 
 from website.models import (
     ShopInfo,
@@ -73,8 +76,51 @@ def dashboard_index(request):
         "today_appointments": today_appointments,
         "pending_payments": pending_payments[:5],
         "upcoming_appointments": upcoming_appointments,
+        "latest_booking_id": Booking.objects.order_by("-id").values_list("id", flat=True).first() or 0,
     }
     return render(request, "dashboard/index.html", context)
+
+
+@login_required
+@user_passes_test(is_staff_user)
+def dashboard_overview_data(request):
+    today = date.today()
+    booking_summary = Booking.objects.aggregate(
+        today_count=Count("id", filter=Q(appointment_date=today)),
+        pending_payments_count=Count("id", filter=Q(payment_status="pending")),
+        confirmed_count=Count("id", filter=Q(status="confirmed")),
+        completed_count=Count("id", filter=Q(status="completed")),
+        latest_booking_id=Max("id"),
+    )
+    today_appointments = Booking.objects.filter(appointment_date=today).select_related("service").order_by("appointment_time")
+    pending_payments = Booking.objects.filter(payment_status="pending").select_related("service").order_by("-created_at")[:5]
+
+    def serialize_booking(booking):
+        return {
+            "id": booking.id,
+            "detail_url": f"/dashboard/bookings/{booking.id}/",
+            "customer_name": booking.customer_name,
+            "phone_number": booking.phone_number or "",
+            "service_name": booking.service.name if booking.service else "",
+            "appointment_date": booking.appointment_date.strftime("%b %d, %Y"),
+            "appointment_date_short": booking.appointment_date.strftime("%b %d"),
+            "appointment_time": booking.appointment_time.strftime("%I:%M %p").lstrip("0"),
+            "status": booking.status,
+            "status_label": booking.get_status_display(),
+            "has_payment_screenshot": bool(booking.payment_screenshot),
+        }
+
+    return JsonResponse({
+        "stats": {
+            "today_count": booking_summary["today_count"],
+            "pending_payments_count": booking_summary["pending_payments_count"],
+            "confirmed_count": booking_summary["confirmed_count"],
+            "completed_count": booking_summary["completed_count"],
+        },
+        "latest_booking_id": booking_summary["latest_booking_id"],
+        "today_appointments": [serialize_booking(booking) for booking in today_appointments],
+        "pending_payments": [serialize_booking(booking) for booking in pending_payments],
+    })
 
 
 @login_required
@@ -222,6 +268,22 @@ def dashboard_offline_booking_create(request):
 @user_passes_test(is_staff_user)
 def dashboard_booking_detail(request, pk):
     booking = get_object_or_404(Booking, pk=pk)
+    return_url_key = f"booking_return_url_{booking.pk}"
+
+    if request.method == "GET":
+        return_url = "/dashboard/bookings/"
+        referer = request.META.get("HTTP_REFERER", "")
+        if url_has_allowed_host_and_scheme(
+            referer,
+            allowed_hosts={request.get_host()},
+            require_https=request.is_secure(),
+        ):
+            referer_parts = urlsplit(referer)
+            if referer_parts.path.startswith("/dashboard/"):
+                return_url = referer_parts.path
+                if referer_parts.query:
+                    return_url += f"?{referer_parts.query}"
+        request.session[return_url_key] = return_url
 
     if request.method == "POST":
         action = request.POST.get("action")
@@ -268,7 +330,7 @@ def dashboard_booking_detail(request, pk):
                 f"Booking #{booking.id} marked as completed."
             )
 
-        return redirect("dashboard_booking_detail", pk=booking.pk)
+        return redirect(request.session.pop(return_url_key, "/dashboard/bookings/"))
 
     return render(
         request,
@@ -370,7 +432,7 @@ def dashboard_shop_info(request):
 @login_required
 @user_passes_test(is_staff_user)
 def dashboard_barbers(request):
-    barbers = Barber.objects.all()
+    barbers = Barber.objects.prefetch_related("services").all()
     edit_id = request.GET.get("edit")
     editing_barber = None
 
@@ -396,6 +458,23 @@ def dashboard_barbers(request):
         "editing_barber": editing_barber,
     }
     return render(request, "dashboard/barbers.html", context)
+
+
+@login_required
+@user_passes_test(is_staff_user)
+def dashboard_barbers_data(request):
+    barbers = Barber.objects.prefetch_related("services").all()
+    return JsonResponse({
+        "barbers": [
+            {
+                "id": barber.id,
+                "name": barber.name,
+                "service_ids": list(barber.services.values_list("id", flat=True)),
+                "services": [service.name for service in barber.services.all()],
+            }
+            for barber in barbers
+        ]
+    })
 
 
 @login_required

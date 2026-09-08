@@ -5,11 +5,13 @@
 
 {% block content %}
 
+<div id="overviewLiveNotice" role="status" aria-live="polite" hidden style="margin-bottom: 16px; color: #2a9d8f; font-size: 0.9rem;"><i class="fa-solid fa-circle-check"></i> New booking received</div>
+
 <!-- METRICS CARDS -->
 <div class="stats-grid">
     <div class="stat-card">
         <div>
-            <div class="val">{{ today_count }}</div>
+            <div class="val" id="overviewTodayCount">{{ today_count }}</div>
             <div class="lbl">Today's Appointments</div>
         </div>
         <div class="icon"><i class="fa-solid fa-calendar-day"></i></div>
@@ -17,7 +19,7 @@
 
     <div class="stat-card">
         <div>
-            <div class="val" style="color: #e9c46a;">{{ pending_payments_count }}</div>
+            <div class="val" id="overviewPendingPayments" style="color: #e9c46a;">{{ pending_payments_count }}</div>
             <div class="lbl">Pending Payments</div>
         </div>
         <div class="icon" style="background: rgba(233, 196, 106, 0.1); color: #e9c46a;"><i class="fa-solid fa-receipt"></i></div>
@@ -25,7 +27,7 @@
 
     <div class="stat-card">
         <div>
-            <div class="val" style="color: #2a9d8f;">{{ confirmed_count }}</div>
+            <div class="val" id="overviewConfirmedCount" style="color: #2a9d8f;">{{ confirmed_count }}</div>
             <div class="lbl">Confirmed Appointments</div>
         </div>
         <div class="icon" style="background: rgba(42, 157, 143, 0.1); color: #2a9d8f;"><i class="fa-solid fa-circle-check"></i></div>
@@ -33,7 +35,7 @@
 
     <div class="stat-card">
         <div>
-            <div class="val">{{ completed_count }}</div>
+            <div class="val" id="overviewCompletedCount">{{ completed_count }}</div>
             <div class="lbl">Completed Total</div>
         </div>
         <div class="icon"><i class="fa-solid fa-scissors"></i></div>
@@ -46,11 +48,11 @@
     <div class="dashboard-card">
         <div class="card-header">
             <span class="card-title"><i class="fa-solid fa-clock"></i> Today's Schedule</span>
-            <span class="badge badge-pending">{{ today_appointments|length }} Bookings</span>
+            <span class="badge badge-pending" id="overviewTodayBadge">{{ today_appointments|length }} Bookings</span>
         </div>
 
         <!-- DESKTOP TABLE VIEW -->
-        <div class="table-responsive desktop-only">
+        <div class="table-responsive desktop-only" id="overviewTodayDesktop">
             <table class="dash-table">
                 <thead>
                     <tr>
@@ -89,7 +91,7 @@
         </div>
 
         <!-- DEDICATED MOBILE CARD LIST -->
-        <div class="mobile-only">
+        <div class="mobile-only" id="overviewTodayMobile">
             <div class="m-card-list">
                 {% for b in today_appointments %}
                     <div class="m-card">
@@ -134,7 +136,7 @@
         </div>
 
         <!-- DESKTOP TABLE VIEW -->
-        <div class="table-responsive desktop-only">
+        <div class="table-responsive desktop-only" id="overviewPendingDesktop">
             <table class="dash-table">
                 <thead>
                     <tr>
@@ -180,7 +182,7 @@
         </div>
 
         <!-- DEDICATED MOBILE CARD LIST -->
-        <div class="mobile-only">
+        <div class="mobile-only" id="overviewPendingMobile">
             <div class="m-card-list">
                 {% for b in pending_payments %}
                     <div class="m-card">
@@ -218,5 +220,88 @@
     </div>
 
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const endpoint = "{% url 'dashboard_overview_data' %}";
+    const initialLatestBookingId = {{ latest_booking_id|default:0 }};
+    let latestBookingId = initialLatestBookingId;
+    let pollHandle;
+
+    const escapeHtml = (value) => String(value ?? "").replace(/[&<>'"]/g, character => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;"
+    }[character]));
+    const bookingLink = booking => `<a href="${booking.detail_url}" class="btn btn-secondary btn-sm">View</a>`;
+    const statusBadge = booking => `<span class="badge badge-${escapeHtml(booking.status)}">${escapeHtml(booking.status_label)}</span>`;
+
+    function renderToday(bookings) {
+        const desktopRows = bookings.length ? bookings.map(booking => `<tr>
+            <td data-label="Time"><strong>${escapeHtml(booking.appointment_time)}</strong></td>
+            <td data-label="Customer"><div><strong>${escapeHtml(booking.customer_name)}</strong></div><small style="color: var(--text-muted);">${escapeHtml(booking.phone_number)}</small></td>
+            <td data-label="Service">${escapeHtml(booking.service_name)}</td>
+            <td data-label="Status">${statusBadge(booking)}</td>
+            <td data-label="Action">${bookingLink(booking)}</td>
+        </tr>`).join("") : `<tr><td colspan="5" class="empty-cell"><i class="fa-solid fa-calendar-xmark"></i> No appointments scheduled for today.</td></tr>`;
+        document.getElementById("overviewTodayDesktop").querySelector("tbody").innerHTML = desktopRows;
+        document.getElementById("overviewTodayMobile").querySelector(".m-card-list").innerHTML = bookings.length ? bookings.map(booking => `<div class="m-card">
+            <div class="m-card-header"><span class="m-card-title"><i class="fa-solid fa-clock" style="color: var(--accent-gold);"></i> ${escapeHtml(booking.appointment_time)}</span>${statusBadge(booking)}</div>
+            <div class="m-card-body"><div class="m-card-row"><span class="m-card-label">Customer</span><span class="m-card-val"><strong>${escapeHtml(booking.customer_name)}</strong><small style="display: block; color: var(--text-muted);">${escapeHtml(booking.phone_number)}</small></span></div><div class="m-card-row"><span class="m-card-label">Service</span><span class="m-card-val">${escapeHtml(booking.service_name)}</span></div></div>
+            <div class="m-card-actions"><a href="${booking.detail_url}" class="btn btn-gold btn-sm">View Details &amp; Status</a></div>
+        </div>`).join("") : `<div class="empty-cell"><i class="fa-solid fa-calendar-xmark"></i> No appointments scheduled for today.</div>`;
+        document.getElementById("overviewTodayBadge").textContent = `${bookings.length} Bookings`;
+    }
+
+    function renderPending(bookings) {
+        const desktopRows = bookings.length ? bookings.map(booking => `<tr>
+            <td data-label="Date &amp; Time"><div>${escapeHtml(booking.appointment_date)}</div><small style="color: var(--text-muted);">${escapeHtml(booking.appointment_time)}</small></td>
+            <td data-label="Customer"><div><strong>${escapeHtml(booking.customer_name)}</strong></div><small style="color: var(--text-muted);">${escapeHtml(booking.phone_number)}</small></td>
+            <td data-label="Screenshot">${booking.has_payment_screenshot ? '<span style="color: #2a9d8f;"><i class="fa-solid fa-image"></i> Uploaded</span>' : '<span style="color: var(--danger);">Missing</span>'}</td>
+            <td data-label="Action"><a href="${booking.detail_url}" class="btn btn-gold btn-sm">Verify</a></td>
+        </tr>`).join("") : `<tr><td colspan="4" class="empty-cell"><i class="fa-solid fa-check-circle" style="color: #2a9d8f;"></i> No pending payment verifications!</td></tr>`;
+        document.getElementById("overviewPendingDesktop").querySelector("tbody").innerHTML = desktopRows;
+        document.getElementById("overviewPendingMobile").querySelector(".m-card-list").innerHTML = bookings.length ? bookings.map(booking => `<div class="m-card">
+            <div class="m-card-header"><span class="m-card-title"><i class="fa-solid fa-calendar-days" style="color: var(--accent-gold);"></i> ${escapeHtml(booking.appointment_date_short)} at ${escapeHtml(booking.appointment_time)}</span>${booking.has_payment_screenshot ? '<span class="badge badge-verified"><i class="fa-solid fa-image"></i> Screenshot Uploaded</span>' : '<span class="badge badge-rejected">Missing</span>'}</div>
+            <div class="m-card-body"><div class="m-card-row"><span class="m-card-label">Customer</span><span class="m-card-val"><strong>${escapeHtml(booking.customer_name)}</strong><small style="display: block; color: var(--text-muted);">${escapeHtml(booking.phone_number)}</small></span></div></div>
+            <div class="m-card-actions"><a href="${booking.detail_url}" class="btn btn-gold btn-sm">Verify Payment &amp; Screenshot</a></div>
+        </div>`).join("") : `<div class="empty-cell"><i class="fa-solid fa-check-circle" style="color: #2a9d8f;"></i> No pending payment verifications!</div>`;
+    }
+
+    function updateOverview(data) {
+        document.getElementById("overviewTodayCount").textContent = data.stats.today_count;
+        document.getElementById("overviewPendingPayments").textContent = data.stats.pending_payments_count;
+        document.getElementById("overviewConfirmedCount").textContent = data.stats.confirmed_count;
+        document.getElementById("overviewCompletedCount").textContent = data.stats.completed_count;
+        renderToday(data.today_appointments);
+        renderPending(data.pending_payments);
+        if (data.latest_booking_id && data.latest_booking_id > latestBookingId) {
+            latestBookingId = data.latest_booking_id;
+            const notice = document.getElementById("overviewLiveNotice");
+            notice.hidden = false;
+            window.setTimeout(() => { notice.hidden = true; }, 8000);
+        }
+    }
+
+    async function pollOverview() {
+        if (document.hidden) return;
+        try {
+            const response = await fetch(endpoint, { headers: { "X-Requested-With": "XMLHttpRequest" }, cache: "no-store" });
+            if (response.ok) updateOverview(await response.json());
+        } catch (error) {
+            // A temporary network failure is retried on the next poll.
+        }
+    }
+
+    function setPolling(active) {
+        if (active && !pollHandle) pollHandle = window.setInterval(pollOverview, 12000);
+        if (!active && pollHandle) { window.clearInterval(pollHandle); pollHandle = null; }
+    }
+
+    document.addEventListener("visibilitychange", () => {
+        setPolling(!document.hidden);
+        if (!document.hidden) pollOverview();
+    });
+    setPolling(!document.hidden);
+});
+</script>
 
 {% endblock %}

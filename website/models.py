@@ -59,6 +59,11 @@ class Testimonial(models.Model):
 class Barber(models.Model):
     name = models.CharField(max_length=100)
     role = models.CharField(max_length=100)
+    services = models.ManyToManyField(
+        Service,
+        blank=True,
+        related_name="barbers",
+    )
     photo = models.ImageField(upload_to="paradise_barber/barbers/", blank=True, null=True)
     bio = models.TextField(blank=True)
     is_available = models.BooleanField(default=True)
@@ -159,3 +164,48 @@ class Booking(models.Model):
             f"{self.customer_name} "
             f"({self.appointment_date} {self.appointment_time})"
         )
+
+    @property
+    def total_duration(self):
+        return sum(item.duration for item in self.appointment_services.all())
+
+    @property
+    def total_price(self):
+        return sum((item.price for item in self.appointment_services.all()), 0)
+
+
+class AppointmentService(models.Model):
+    booking = models.ForeignKey(
+        Booking,
+        on_delete=models.CASCADE,
+        related_name="appointment_services",
+    )
+    service = models.ForeignKey(
+        Service,
+        on_delete=models.PROTECT,
+        related_name="appointment_services",
+    )
+    barber = models.ForeignKey(
+        Barber,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="appointment_services",
+    )
+    sequence = models.PositiveIntegerField()
+    duration = models.PositiveIntegerField()
+    price = models.DecimalField(max_digits=8, decimal_places=2)
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+
+    class Meta:
+        ordering = ["sequence"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["booking", "sequence"],
+                name="unique_booking_service_sequence",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.booking_id}: {self.service.name} ({self.sequence})"

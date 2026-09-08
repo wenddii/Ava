@@ -1,7 +1,8 @@
 from datetime import date, timedelta
 from django.test import TestCase, Client
 from django.core.files.uploadedfile import SimpleUploadedFile
-from website.models import ShopInfo, Service, Barber, Booking
+from website.models import ShopInfo, Service, Barber, Booking, AppointmentService
+import json
 
 
 class WebsitePublicTests(TestCase):
@@ -73,6 +74,120 @@ class WebsitePublicTests(TestCase):
         self.assertTrue(len(data["slots"]) > 0)
         first_slot = data["slots"][0]
         self.assertIn("AM", first_slot["display"])
+
+    def test_multi_service_booking_uses_eligible_stylists_and_sequential_slots(self):
+        manicure = Service.objects.create(
+            name="Manicure",
+            description="Nail care",
+            price=400.00,
+            duration=45,
+        )
+        second_barber = Barber.objects.create(name="Sara", role="Stylist")
+        self.barber.services.add(self.service)
+        second_barber.services.add(manicure)
+        target_date = date.today() + timedelta(days=1)
+
+        eligible = self.client.get(f"/api/eligible-barbers/?service={self.service.id}")
+        self.assertEqual(eligible.status_code, 200)
+        self.assertEqual([item["id"] for item in eligible.json()["barbers"]], [self.barber.id])
+
+        existing = Booking.objects.create(
+            customer_name="Existing Customer",
+            phone_number="0911999000",
+            service=manicure,
+            barber=second_barber,
+            appointment_date=target_date,
+            appointment_time="10:30:00",
+            payment_status="pending",
+            status="pending",
+        )
+        AppointmentService.objects.create(
+            booking=existing,
+            service=manicure,
+            barber=second_barber,
+            sequence=1,
+            duration=manicure.duration,
+            price=manicure.price,
+            start_time="10:30:00",
+            end_time="11:15:00",
+        )
+
+        assignments = [
+            {"service_id": self.service.id, "barber_id": self.barber.id},
+            {"service_id": manicure.id, "barber_id": second_barber.id},
+        ]
+        slots = self.client.get(
+            f"/api/available-slots/?date={target_date:%Y-%m-%d}&assignments={json.dumps(assignments)}"
+        )
+        self.assertEqual(slots.status_code, 200)
+        self.assertNotIn("10:00", [slot["value"] for slot in slots.json()["slots"]])
+
+        response = self.client.post("/booking/", {
+            "customer_name": "Multi Service Customer",
+            "phone_number": "0911223344",
+            "service": self.service.id,
+            "barber": self.barber.id,
+            "appointment_date": target_date.strftime("%Y-%m-%d"),
+            "appointment_time": "12:00",
+            "appointment_services": json.dumps(assignments),
+            "notes": "Sequential appointment",
+            "payment_screenshot": self.dummy_image,
+        })
+        self.assertEqual(response.status_code, 302)
+        booking = Booking.objects.get(customer_name="Multi Service Customer")
+        segments = list(booking.appointment_services.all())
+        self.assertEqual(len(segments), 2)
+        self.assertEqual([segment.sequence for segment in segments], [1, 2])
+        self.assertEqual([segment.barber_id for segment in segments], [self.barber.id, second_barber.id])
+        self.assertEqual(segments[0].start_time.strftime("%H:%M"), "12:00")
+        self.assertEqual(segments[0].end_time.strftime("%H:%M"), "12:30")
+        self.assertEqual(segments[1].start_time.strftime("%H:%M"), "12:30")
+        self.assertEqual(segments[1].end_time.strftime("%H:%M"), "13:15")
+
+    def test_eligible_stylists_are_limited_to_service_assignments(self):
+        manicure = Service.objects.create(
+            name="Manicure",
+            description="Nail care",
+            price=400.00,
+            duration=45,
+        )
+        sara = Barber.objects.create(name="Sara", role="Stylist")
+        self.barber.services.add(self.service)
+        sara.services.add(manicure)
+
+        haircut_response = self.client.get(f"/api/eligible-barbers/?service={self.service.id}")
+        manicure_response = self.client.get(f"/api/eligible-barbers/?service={manicure.id}")
+
+        self.assertEqual([barber["id"] for barber in haircut_response.json()["barbers"]], [self.barber.id])
+        self.assertEqual([barber["id"] for barber in manicure_response.json()["barbers"]], [sara.id])
+
+    def test_unassigned_service_has_no_stylists_and_invalid_assignment_is_rejected(self):
+        unassigned = Service.objects.create(
+            name="Hair Coloring",
+            description="Color treatment",
+            price=600.00,
+            duration=60,
+        )
+        eligible = self.client.get(f"/api/eligible-barbers/?service={unassigned.id}")
+        self.assertEqual(eligible.status_code, 200)
+        self.assertEqual(eligible.json()["barbers"], [])
+
+        invalid = self.client.get(
+            f"/api/available-slots/?date={(date.today() + timedelta(days=1)):%Y-%m-%d}"
+            f"&assignments={json.dumps([{'service_id': unassigned.id, 'barber_id': self.barber.id}])}"
+        )
+        self.assertEqual(invalid.status_code, 400)
+        self.assertEqual(invalid.json()["error"], "This stylist is unavailable for this service.")
+
+    def test_booking_page_has_service_first_stylist_flow(self):
+        response = self.client.get("/booking/")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Service")
+        self.assertContains(response, "Stylist")
+        self.assertContains(response, "Summary")
+        self.assertContains(response, "Services")
+        self.assertContains(response, "Confirm")
+        self.assertNotContains(response, "Preferred Stylist")
 
     def test_shop_logo_rendering_and_fallback(self):
         # 1. Test fallback name when no logo exists

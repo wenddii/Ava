@@ -5,6 +5,90 @@
 
 {% block content %}
 
+<style>
+    .booking-page .booking-card { overflow: hidden; }
+    .booking-page .booking-header { margin-bottom: 30px; }
+    .booking-progress { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin: 0 auto 26px; color: var(--text-muted); font-size: .8rem; }
+    .booking-progress span { display: inline-flex; align-items: center; gap: 7px; }
+    .booking-progress span:not(:last-child)::after { content: "→"; margin-left: 3px; color: var(--gold); }
+    .booking-progress .is-active { color: var(--gold); font-weight: 700; }
+    .booking-step { display: none; animation: booking-step-in .22s ease-out; }
+    .booking-step.is-active { display: block; }
+    .booking-step-heading { margin-bottom: 18px; }
+    .booking-step-heading h3 { margin: 0 0 5px; color: var(--text); }
+    .booking-step-heading p { margin: 0; color: var(--text-muted); font-size: .92rem; }
+    .booking-choice-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+    .booking-choice { position: relative; min-height: 92px; text-align: left; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-card); color: var(--text); padding: 17px; cursor: pointer; transition: border-color .18s ease, transform .18s ease, background .18s ease; }
+    .booking-choice:hover { transform: translateY(-2px); border-color: var(--gold); }
+    .booking-choice.is-selected { border-color: var(--gold); background: var(--gold-soft); box-shadow: 0 0 0 2px rgba(197, 155, 83, .18); }
+    .booking-choice strong, .booking-choice small { display: block; }
+    .booking-choice strong { margin-bottom: 9px; }
+    .booking-choice small { color: var(--text-muted); }
+    .booking-choice .booking-price { color: var(--gold); font-weight: 700; font-size: 1rem; }
+    .booking-choice .booking-check { position: absolute; right: 13px; top: 13px; color: var(--gold); opacity: 0; }
+    .booking-choice.is-selected .booking-check { opacity: 1; }
+    .booking-date-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    .booking-date { min-height: 86px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-card); color: var(--text); padding: 15px 8px; cursor: pointer; }
+    .booking-date strong, .booking-date small { display: block; }
+    .booking-date strong { font-size: 1.2rem; margin: 4px 0; }
+    .booking-date small { color: var(--text-muted); }
+    .booking-date.is-selected { background: var(--gold); border-color: var(--gold); color: #17120c; }
+    .booking-date.is-selected small { color: #17120c; }
+    .booking-time-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(125px, 1fr)); gap: 10px; }
+    .booking-time { min-height: 50px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-card); color: var(--text); padding: 14px 8px; cursor: pointer; font-weight: 600; }
+    .booking-time:hover, .booking-time.is-selected { border-color: var(--gold); background: var(--gold-soft); color: var(--gold); }
+    .booking-time:disabled { cursor: not-allowed; opacity: .38; text-decoration: line-through; }
+    .booking-step-actions { display: flex; justify-content: space-between; gap: 12px; margin-top: 25px; }
+    .booking-summary { border: 1px solid var(--border); border-radius: 10px; padding: 18px; margin: 20px 0; background: rgba(255,255,255,.025); }
+    .booking-summary-row { display: flex; justify-content: space-between; gap: 20px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .booking-summary-row:last-child { border-bottom: 0; }
+    .booking-summary-row span { color: var(--text-muted); }
+    .booking-hidden-field { display: none; }
+    .booking-page .booking-payment-guide { margin-top: 0; }
+    .booking-inline-error { display: block; min-height: 1.25em; color: #b44a4a; font-size: .82rem; margin-top: 7px; }
+    .booking-inline-error:empty { display: none; }
+    .booking-invalid { border-color: #b44a4a !important; box-shadow: 0 0 0 2px rgba(180, 74, 74, .12); }
+    .booking-choice:focus-visible, .booking-date:focus-visible, .booking-time:focus-visible { outline: 3px solid rgba(197, 155, 83, .35); outline-offset: 2px; }
+    .booking-submit-loading { pointer-events: none; opacity: .75; }
+    .booking-selected-list { display: grid; gap: 10px; margin: 16px 0; }
+    .booking-selected-item { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 13px 14px; border: 1px solid var(--border); border-radius: 9px; background: rgba(255,255,255,.025); }
+    .booking-selected-item small { display: block; color: var(--text-muted); margin-top: 4px; }
+    .booking-remove { border: 0; background: transparent; color: var(--text-muted); cursor: pointer; padding: 8px; }
+    .booking-remove:hover { color: #b44a4a; }
+    .booking-total { display: flex; justify-content: space-between; gap: 12px; padding-top: 13px; border-top: 1px solid var(--border); color: var(--text-muted); }
+    .booking-total strong { color: var(--gold); }
+    .booking-choice.is-disabled { opacity: .5; cursor: not-allowed; }
+    @keyframes booking-step-in { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 560px) {
+        .booking-page { padding-top: 24px; }
+        .booking-page .container { width: 100%; padding: 0 12px; }
+        .booking-page .booking-header { margin-bottom: 22px; }
+        .booking-header h2 { font-size: 1.85rem; }
+        .booking-header p { font-size: .88rem; }
+        .booking-card { border-radius: 14px; padding: 18px 14px; }
+        .booking-progress { justify-content: flex-start; overflow: hidden; gap: 5px; margin-bottom: 22px; font-size: .72rem; white-space: nowrap; }
+        .booking-progress span:not(:last-child)::after { margin-left: 1px; }
+        .booking-step-heading { margin-bottom: 15px; }
+        .booking-step-heading h3 { font-size: 1.25rem; }
+        .booking-step-heading p { font-size: .84rem; line-height: 1.45; }
+        .booking-choice-grid { grid-template-columns: 1fr; gap: 9px; }
+        .booking-choice { min-height: 78px; padding: 15px; }
+        .booking-date-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 0; padding: 2px 0 8px; }
+        .booking-date { flex: 0 0 72px; min-height: 82px; padding: 12px 6px; scroll-snap-align: start; }
+        .booking-time-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+        .booking-time { min-height: 52px; padding: 13px 5px; }
+        .booking-step-actions { flex-direction: column-reverse; gap: 9px; margin-top: 22px; }
+        .booking-step-actions .button { width: 100%; min-height: 50px; justify-content: center; }
+        .booking-summary { padding: 14px; margin: 16px 0; }
+        .booking-summary-row { align-items: baseline; gap: 10px; font-size: .9rem; }
+        .booking-summary-row strong { text-align: right; overflow-wrap: anywhere; }
+        .booking-payment-guide { padding: 16px; }
+        .booking-payment-guide h4 { font-size: 1rem; }
+        .booking-label { gap: 8px; font-size: .86rem; }
+        .booking-page input, .booking-page select, .booking-page textarea { max-width: 100%; font-size: 16px; }
+    }
+</style>
+
 <div class="page-shell">
     {% include 'components/navbar.html' %}
 
@@ -40,117 +124,70 @@
             {% else %}
 
             <div class="booking-card">
-                
-                <form method="POST" enctype="multipart/form-data" id="bookingForm">
+                <div class="booking-progress" aria-label="Booking progress">
+                    <span class="is-active" data-progress="1">Service</span><span data-progress="2">Stylist</span><span data-progress="3">Summary</span><span data-progress="4">Date</span><span data-progress="5">Time</span><span data-progress="6">Details</span><span data-progress="7">Confirm</span>
+                </div>
+
+                <form method="POST" enctype="multipart/form-data" id="bookingForm" data-multi-service-booking="true">
                     {% csrf_token %}
+                    <div class="booking-hidden-field">{{ form.service }}{{ form.barber }}{{ form.appointment_date }}{{ form.appointment_time }}<input type="hidden" id="appointmentServicesInput" name="appointment_services"></div>
 
-                    <div class="booking-form-row">
-                        <div class="booking-form-group">
-                            <label class="booking-label">
-                                <span class="step-num">1</span>
-                                <i class="fa-solid fa-spa"></i> Select Treatment / Service *
-                            </label>
-                            {{ form.service }}
-                            {% if form.service.errors %}
-                                <span class="booking-field-error">{{ form.service.errors.0 }}</span>
-                            {% endif %}
+                    <section class="booking-step is-active" data-step="1">
+                        <div class="booking-step-heading"><h3>Build your appointment</h3><p>Select a service, then choose its eligible stylist.</p></div>
+                        <div class="booking-choice-grid" id="serviceChoices">
+                            {% for service in services %}
+                                <button type="button" class="booking-choice" data-service="{{ service.id }}" data-service-name="{{ service.name }}" data-service-price="{{ service.price }}" data-service-duration="{{ service.duration }}">
+                                    <i class="fa-solid fa-check booking-check"></i><strong>{{ service.name }}</strong><span class="booking-price">{{ service.price }} ETB</span><small>About {{ service.duration }} minutes</small>
+                                </button>
+                            {% endfor %}
                         </div>
+                        <span class="booking-inline-error" data-error-for="service" role="alert">{% if form.service.errors %}{{ form.service.errors.0 }}{% endif %}</span>
+                        <div class="booking-step-heading" id="stylistHeading" style="display: none; margin-top: 20px;"><h3>Choose a stylist</h3><p id="stylistPrompt">Only stylists assigned to this service are shown.</p></div>
+                        <div class="booking-choice-grid" id="stylistChoices"></div>
+                        <span class="booking-inline-error" data-error-for="stylist" role="alert"></span>
+                        <div class="booking-selected-list" id="currentSelection"></div>
+                        <div class="booking-step-actions"><span></span><div style="display: flex; gap: 10px; flex: 1; justify-content: flex-end;"><button type="button" class="button button-ghost" id="addAnotherService">+ Add another service</button><button type="button" class="button button-primary" id="continueServices">Continue <i class="fa-solid fa-arrow-right"></i></button></div></div>
+                    </section>
 
-                        <div class="booking-form-group">
-                            <label class="booking-label">
-                                <span class="step-num">2</span>
-                                <i class="fa-solid fa-wand-magic-sparkles"></i> Preferred Stylist (Optional)
-                            </label>
-                            {{ form.barber }}
-                            {% if form.barber.errors %}
-                                <span class="booking-field-error">{{ form.barber.errors.0 }}</span>
-                            {% endif %}
+                    <section class="booking-step" data-step="2">
+                        <div class="booking-step-heading"><h3>Review services</h3><p>Each service will follow the previous one in your appointment.</p></div>
+                        <div class="booking-selected-list" id="serviceSummary"></div>
+                        <div class="booking-total"><span>Total appointment</span><strong id="summaryTotal">—</strong></div>
+                        <div class="booking-step-actions"><button type="button" class="button button-ghost" data-back="1"><i class="fa-solid fa-arrow-left"></i> Change</button><button type="button" class="button button-primary" data-next="3">Choose a date <i class="fa-solid fa-arrow-right"></i></button></div>
+                    </section>
+
+                    <section class="booking-step" data-step="3">
+                        <div class="booking-step-heading"><h3>Choose a date</h3><p>Select the day for your complete sequential appointment.</p></div>
+                        <div class="booking-date-grid" id="bookingDates"></div>
+                        <span class="booking-inline-error" data-error-for="date" role="alert">{% if form.appointment_date.errors %}{{ form.appointment_date.errors.0 }}{% endif %}</span>
+                        <div class="booking-step-actions"><button type="button" class="button button-ghost" data-back="2"><i class="fa-solid fa-arrow-left"></i> Back</button><button type="button" class="button button-primary" data-next="4">Choose a starting time <i class="fa-solid fa-arrow-right"></i></button></div>
+                    </section>
+
+                    <section class="booking-step" data-step="4">
+                        <div class="booking-step-heading"><h3>Choose a starting time</h3><p id="timePrompt">Your services will be scheduled sequentially from this time.</p></div>
+                        <div id="slot-loader" class="booking-slot-loader"><i class="fa-solid fa-spinner fa-spin"></i> Checking available time slots...</div>
+                        <div class="booking-time-grid" id="bookingTimes"></div>
+                        <span class="booking-inline-error" data-error-for="time" role="alert">{% if form.appointment_time.errors %}{{ form.appointment_time.errors.0 }}{% endif %}</span>
+                        <div class="booking-step-actions"><button type="button" class="button button-ghost" data-back="3"><i class="fa-solid fa-arrow-left"></i> Back</button><button type="button" class="button button-primary" data-next="5">Add your details <i class="fa-solid fa-arrow-right"></i></button></div>
+                    </section>
+
+                    <section class="booking-step" data-step="5">
+                        <div class="booking-step-heading"><h3>Your details</h3><p>Just the essentials so we can prepare for your visit.</p></div>
+                        <div class="booking-form-row">
+                            <div class="booking-form-group"><label class="booking-label"><i class="fa-solid fa-user"></i> Full Name *</label>{{ form.customer_name }}<span class="booking-inline-error" data-error-for="name" role="alert">{% if form.customer_name.errors %}{{ form.customer_name.errors.0 }}{% endif %}</span></div>
+                            <div class="booking-form-group"><label class="booking-label"><i class="fa-solid fa-phone"></i> Phone Number *</label>{{ form.phone_number }}<span class="booking-inline-error" data-error-for="phone" role="alert">{% if form.phone_number.errors %}{{ form.phone_number.errors.0 }}{% endif %}</span></div>
                         </div>
-                    </div>
+                        <div class="booking-form-group"><label class="booking-label"><i class="fa-solid fa-comment-dots"></i> Notes <small>(Optional)</small></label>{{ form.notes }}</div>
+                        <div class="booking-payment-guide"><h4><i class="fa-solid fa-wallet"></i> Payment Instructions &amp; Deposit</h4><div class="payment-instructions-content">{{ shop.payment_instructions|default:"Please transfer the appointment fee using CBE or Telebirr and attach your receipt below to secure your booking." }}</div></div>
+                        <div class="booking-file-upload"><label class="booking-label"><i class="fa-solid fa-file-arrow-up"></i> Payment Receipt / Screenshot *</label>{{ form.payment_screenshot }}<div class="booking-file-hint"><i class="fa-solid fa-circle-info"></i> Upload a clear image of your transfer receipt.</div><span class="booking-inline-error" data-error-for="payment" role="alert">{% if form.payment_screenshot.errors %}{{ form.payment_screenshot.errors.0 }}{% endif %}</span></div>
+                        <div class="booking-step-actions"><button type="button" class="button button-ghost" data-back="4"><i class="fa-solid fa-arrow-left"></i> Back</button><button type="button" class="button button-primary" data-next="6">Review appointment <i class="fa-solid fa-arrow-right"></i></button></div>
+                    </section>
 
-                    <div class="booking-form-row">
-                        <div class="booking-form-group">
-                            <label class="booking-label">
-                                <span class="step-num">3</span>
-                                <i class="fa-solid fa-calendar-days"></i> Appointment Date * <small style="font-weight: 400; color: var(--text-muted);">(Next 3 Days)</small>
-                            </label>
-                            <input type="date" name="appointment_date" class="form-control" id="id_appointment_date" value="{{ form.appointment_date.value|default:today }}" min="{{ today }}" max="{{ max_date }}" required>
-                            {% if form.appointment_date.errors %}
-                                <span class="booking-field-error">{{ form.appointment_date.errors.0 }}</span>
-                            {% endif %}
-                        </div>
-
-                        <div class="booking-form-group">
-                            <label class="booking-label">
-                                <span class="step-num">4</span>
-                                <i class="fa-solid fa-clock"></i> Select Time Slot *
-                            </label>
-                            <select name="appointment_time" id="id_appointment_time" class="form-select" required>
-                                <option value="">-- Choose Date &amp; Service First --</option>
-                            </select>
-                            {% if form.appointment_time.errors %}
-                                <span class="booking-field-error">{{ form.appointment_time.errors.0 }}</span>
-                            {% endif %}
-                        </div>
-                    </div>
-
-                    <div id="slot-loader" class="booking-slot-loader">
-                        <i class="fa-solid fa-spinner fa-spin"></i> Checking available time slots...
-                    </div>
-
-                    <hr class="booking-divider">
-
-                    <div class="booking-form-row">
-                        <div class="booking-form-group">
-                            <label class="booking-label">
-                                <i class="fa-solid fa-user"></i> Full Name *
-                            </label>
-                            {{ form.customer_name }}
-                            {% if form.customer_name.errors %}
-                                <span class="booking-field-error">{{ form.customer_name.errors.0 }}</span>
-                            {% endif %}
-                        </div>
-
-                        <div class="booking-form-group">
-                            <label class="booking-label">
-                                <i class="fa-solid fa-phone"></i> Phone Number *
-                            </label>
-                            {{ form.phone_number }}
-                            {% if form.phone_number.errors %}
-                                <span class="booking-field-error">{{ form.phone_number.errors.0 }}</span>
-                            {% endif %}
-                        </div>
-                    </div>
-
-                    <div class="booking-form-group" style="margin-bottom: 24px;">
-                        <label class="booking-label"><i class="fa-solid fa-comment-dots"></i> Special Preferences or Notes (Optional)</label>
-                        {{ form.notes }}
-                    </div>
-
-                    <!-- PAYMENT INSTRUCTIONS BOX -->
-                    <div class="booking-payment-guide">
-                        <h4><i class="fa-solid fa-wallet"></i> Payment Instructions &amp; Deposit</h4>
-                        <div class="payment-instructions-content">
-                            {{ shop.payment_instructions|default:"Please transfer the appointment fee using CBE or Telebirr and attach your receipt below to secure your booking." }}
-                        </div>
-                    </div>
-
-                    <div class="booking-file-upload" style="margin-bottom: 28px;">
-                        <label class="booking-label">
-                            <i class="fa-solid fa-file-arrow-up"></i> Upload Payment Receipt / Screenshot *
-                        </label>
-                        {{ form.payment_screenshot }}
-                        <div class="booking-file-hint" style="margin-top: 8px; font-size: 0.85rem; color: var(--text-muted);">
-                            <i class="fa-solid fa-circle-info"></i> Upload a clear image (JPG, PNG) of your completed transfer receipt.
-                        </div>
-                        {% if form.payment_screenshot.errors %}
-                            <span class="booking-field-error">{{ form.payment_screenshot.errors.0 }}</span>
-                        {% endif %}
-                    </div>
-
-                    <button type="submit" class="button button-primary button-full" style="padding: 16px; font-size: 1.05rem;">
-                        <i class="fa-solid fa-heart"></i> Confirm &amp; Submit Reservation
-                    </button>
+                    <section class="booking-step" data-step="6">
+                        <div class="booking-step-heading"><h3>Appointment confirmation</h3><p>Review every service, stylist, time segment, and total before confirming.</p></div>
+                        <div class="booking-summary" id="finalSummary"></div>
+                        <div class="booking-step-actions"><button type="button" class="button button-ghost" data-back="5"><i class="fa-solid fa-arrow-left"></i> Change details</button><button type="submit" class="button button-primary"><i class="fa-solid fa-heart"></i> Confirm Booking</button></div>
+                    </section>
                 </form>
             </div>
 
@@ -164,11 +201,106 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
+    if (document.getElementById("bookingForm")?.dataset.multiServiceBooking === "true") return;
     const serviceSelect = document.getElementById("id_service");
     const barberSelect = document.getElementById("id_barber");
     const dateInput = document.getElementById("id_appointment_date");
     const timeSelect = document.getElementById("id_appointment_time");
     const loader = document.getElementById("slot-loader");
+    const dates = document.getElementById("bookingDates");
+    const times = document.getElementById("bookingTimes");
+    const form = document.getElementById("bookingForm");
+    const progress = document.querySelectorAll("[data-progress]");
+    let selectedService = document.querySelector(`[data-service=\"${serviceSelect.value}\"]`);
+
+    function showStep(stepNumber) {
+        document.querySelectorAll(".booking-step").forEach(step => step.classList.toggle("is-active", step.dataset.step === String(stepNumber)));
+        progress.forEach(item => item.classList.toggle("is-active", Number(item.dataset.progress) <= stepNumber));
+        const cardTop = form.closest(".booking-card").getBoundingClientRect().top + window.scrollY - 16;
+        window.scrollTo({ top: Math.max(0, cardTop), behavior: "smooth" });
+    }
+
+    function setError(key, message, target) {
+        const error = document.querySelector(`[data-error-for=\"${key}\"]`);
+        if (error) error.textContent = message || "";
+        if (target) target.classList.toggle("booking-invalid", Boolean(message));
+        if (target) target.setAttribute("aria-invalid", message ? "true" : "false");
+        return Boolean(message);
+    }
+
+    function validateSelections() {
+        if (!serviceSelect.value) {
+            setError("service", "Please select a service.", document.querySelector(".booking-choice-grid"));
+            return false;
+        }
+        setError("service", "", document.querySelector(".booking-choice-grid"));
+        return true;
+    }
+
+    function validateDate() {
+        return !setError("date", dateInput.value ? "" : "Please choose a date.", dates);
+    }
+
+    function validateTime() {
+        return !setError("time", timeSelect.value ? "" : "Please select a time.", times);
+    }
+
+    function validateDetails() {
+        const name = document.getElementById("id_customer_name");
+        const phone = document.getElementById("id_phone_number");
+        const payment = document.getElementById("id_payment_screenshot");
+        let valid = true;
+        if (!name.value.trim()) valid = !setError("name", "Please enter your name.", name) && valid;
+        else setError("name", "", name);
+        const normalizedPhone = phone.value.replace(/[\s()-]/g, "");
+        if (!normalizedPhone) valid = !setError("phone", "Please enter your phone number.", phone) && valid;
+        else if (!/^\+?\d{9,15}$/.test(normalizedPhone)) valid = !setError("phone", "Please enter a valid phone number.", phone) && valid;
+        else setError("phone", "", phone);
+        if (!payment.files.length) valid = !setError("payment", "Please enter your payment information.", payment) && valid;
+        else setError("payment", "", payment);
+        return valid;
+    }
+
+    function selectService(card) {
+        document.querySelectorAll(".booking-choice").forEach(item => item.classList.remove("is-selected"));
+        card.classList.add("is-selected");
+        serviceSelect.value = card.dataset.service;
+        selectedService = card;
+        setError("service", "", document.querySelector(".booking-choice-grid"));
+        timeSelect.value = "";
+        fetchAvailableSlots();
+    }
+
+    document.querySelectorAll(".booking-choice").forEach(card => {
+        card.addEventListener("click", () => selectService(card));
+    });
+    if (selectedService) selectService(selectedService);
+
+    function buildDates() {
+        const start = new Date("{{ today }}T00:00:00");
+        const selected = dateInput.value || "{{ today }}";
+        dates.innerHTML = "";
+        for (let index = 0; index <= 3; index += 1) {
+            const current = new Date(start);
+            current.setDate(start.getDate() + index);
+            const value = current.toISOString().slice(0, 10);
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = `booking-date${value === selected ? " is-selected" : ""}`;
+            button.dataset.date = value;
+            button.innerHTML = `<small>${current.toLocaleDateString(undefined, { weekday: "short" })}</small><strong>${current.getDate()}</strong><small>${current.toLocaleDateString(undefined, { month: "short" })}</small>`;
+            button.addEventListener("click", () => {
+                document.querySelectorAll(".booking-date").forEach(item => item.classList.remove("is-selected"));
+                button.classList.add("is-selected");
+                dateInput.value = value;
+                timeSelect.value = "";
+                setError("date", "", dates);
+                fetchAvailableSlots();
+            });
+            dates.appendChild(button);
+        }
+    }
+    buildDates();
 
     function fetchAvailableSlots() {
         const dateVal = dateInput.value;
@@ -176,12 +308,12 @@ document.addEventListener("DOMContentLoaded", function() {
         const barberVal = barberSelect ? barberSelect.value : "";
 
         if (!dateVal || !serviceVal) {
-            timeSelect.innerHTML = `<option value="">-- Choose Date &amp; Service First --</option>`;
+            times.innerHTML = "";
             return;
         }
 
         loader.style.display = "block";
-        timeSelect.innerHTML = '<option value="">Loading available slots...</option>';
+        times.innerHTML = "";
 
         let url = `/api/available-slots/?date=${encodeURIComponent(dateVal)}&service=${encodeURIComponent(serviceVal)}`;
         if (barberVal) {
@@ -192,41 +324,529 @@ document.addEventListener("DOMContentLoaded", function() {
             .then(res => res.json())
             .then(data => {
                 loader.style.display = "none";
-                timeSelect.innerHTML = "";
+                times.innerHTML = "";
 
-                if (data.slots && data.slots.length > 0) {
-                    const defaultOpt = document.createElement("option");
-                    defaultOpt.value = "";
-                    defaultOpt.textContent = "-- Select Available Time --";
-                    timeSelect.appendChild(defaultOpt);
-
-                    data.slots.forEach(slot => {
-                        const opt = document.createElement("option");
-                        opt.value = slot.value;
-                        opt.textContent = slot.display;
-                        timeSelect.appendChild(opt);
-                    });
-                } else {
-                    const opt = document.createElement("option");
-                    opt.value = "";
-                    opt.textContent = "No available slots for this date/specialist";
-                    timeSelect.appendChild(opt);
+                {
+                    const availableSlots = new Map((data.slots || []).map(slot => [slot.value, slot.display]));
+                    for (let minutes = 9 * 60; minutes < 20 * 60; minutes += 30) {
+                        const value = `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
+                        const button = document.createElement("button");
+                        button.type = "button";
+                        button.className = "booking-time";
+                        button.textContent = availableSlots.get(value) || new Date(`2000-01-01T${value}:00`).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+                        button.disabled = !availableSlots.has(value);
+                        button.addEventListener("click", () => {
+                            document.querySelectorAll(".booking-time").forEach(item => item.classList.remove("is-selected"));
+                            button.classList.add("is-selected");
+                            timeSelect.value = value;
+                            setError("time", "", times);
+                        });
+                        times.appendChild(button);
+                    }
+                    document.getElementById("timePrompt").textContent = availableSlots.size ? "Choose a time that works for you." : "There are no available times for this date. Please choose another.";
                 }
             })
             .catch(err => {
                 loader.style.display = "none";
-                timeSelect.innerHTML = '<option value="">Error loading slots</option>';
+                times.innerHTML = "";
+                document.getElementById("timePrompt").textContent = "We could not load times right now. Please try again.";
                 console.error("Error fetching slots:", err);
             });
     }
 
-    serviceSelect.addEventListener("change", fetchAvailableSlots);
     if (barberSelect) barberSelect.addEventListener("change", fetchAvailableSlots);
-    dateInput.addEventListener("change", fetchAvailableSlots);
+    document.querySelectorAll("[data-next]").forEach(button => button.addEventListener("click", () => {
+        const next = Number(button.dataset.next);
+        if (next === 2 && !validateSelections()) return;
+        if (next === 3 && !validateDate()) return;
+        if (next === 4 && !validateTime()) return;
+        if (next === 5 && !validateDetails()) return;
+        if (next === 5) {
+            document.getElementById("summaryService").textContent = selectedService ? selectedService.dataset.serviceName : "—";
+            document.getElementById("summaryDate").textContent = new Date(`${dateInput.value}T00:00:00`).toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
+            document.getElementById("summaryTime").textContent = document.querySelector(".booking-time.is-selected")?.textContent || "—";
+            document.getElementById("summaryPrice").textContent = selectedService ? `${selectedService.dataset.servicePrice} ETB` : "—";
+            document.getElementById("summaryName").textContent = document.getElementById("id_customer_name").value || "—";
+        }
+        showStep(next);
+    }));
+    document.querySelectorAll("[data-back]").forEach(button => button.addEventListener("click", () => showStep(Number(button.dataset.back))));
+    ["input", "change"].forEach(eventName => {
+        form.addEventListener(eventName, event => {
+            const field = event.target;
+            if (field.id === "id_customer_name" && field.value.trim()) setError("name", "", field);
+            if (field.id === "id_phone_number") {
+                const normalizedPhone = field.value.replace(/[\s()-]/g, "");
+                if (/^\+?\d{9,15}$/.test(normalizedPhone)) setError("phone", "", field);
+            }
+            if (field.id === "id_payment_screenshot" && field.files.length) setError("payment", "", field);
+        });
+    });
+    form.addEventListener("submit", event => {
+        if (!validateSelections() || !validateDate() || !validateTime() || !validateDetails()) {
+            event.preventDefault();
+            return;
+        }
+        const submitButton = form.querySelector("button[type=submit]");
+        if (submitButton.dataset.submitting === "true") {
+            event.preventDefault();
+            return;
+        }
+        submitButton.dataset.submitting = "true";
+        submitButton.classList.add("booking-submit-loading");
+        submitButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending your request...';
+    });
+    if (serviceSelect.value && dateInput.value) fetchAvailableSlots();
+});
+</script>
 
-    if (serviceSelect.value && dateInput.value) {
-        fetchAvailableSlots();
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("bookingForm");
+    if (form?.dataset.multiServiceBooking === "true") return;
+    if (!form) return;
+    const serviceSelect = document.getElementById("id_service");
+    const barberSelect = document.getElementById("id_barber");
+    const dateInput = document.getElementById("id_appointment_date");
+    const timeInput = document.getElementById("id_appointment_time");
+    const serviceInput = document.getElementById("appointmentServicesInput");
+    const dates = document.getElementById("bookingDates");
+    const times = document.getElementById("bookingTimes");
+    const stylistChoices = document.getElementById("stylistChoices");
+    const currentSelection = document.getElementById("currentSelection");
+    const serviceSummary = document.getElementById("serviceSummary");
+    const finalSummary = document.getElementById("finalSummary");
+    const selectedServices = [];
+    let pendingService = null;
+    let latestSlotsRequest = 0;
+
+    const money = value => `${Number(value).toFixed(2).replace(/\.00$/, "")} ETB`;
+    const minutesLabel = value => `${value} minute${Number(value) === 1 ? "" : "s"}`;
+    const setError = (key, message, target) => {
+        const error = document.querySelector(`[data-error-for="${key}"]`);
+        if (error) error.textContent = message || "";
+        if (target) target.classList.toggle("booking-invalid", Boolean(message));
+        return !message;
+    };
+
+    function showStep(step) {
+        document.querySelectorAll(".booking-step").forEach(item => item.classList.toggle("is-active", item.dataset.step === String(step)));
+        document.querySelectorAll("[data-progress]").forEach(item => item.classList.toggle("is-active", Number(item.dataset.progress) <= step));
+        window.scrollTo({ top: Math.max(0, form.getBoundingClientRect().top + window.scrollY - 16), behavior: "smooth" });
     }
+
+    function syncHiddenFields() {
+        const first = selectedServices[0];
+        serviceSelect.value = first ? first.service_id : "";
+        barberSelect.value = first?.barber_id || "";
+        serviceInput.value = JSON.stringify(selectedServices.map(item => ({ service_id: item.service_id, barber_id: item.barber_id || null })));
+    }
+
+    function renderSelected(container, removable) {
+        container.innerHTML = selectedServices.length ? selectedServices.map((item, index) => `<div class="booking-selected-item">
+            <div><strong>${item.service_name}</strong><small>${item.barber_name || "No specific stylist"} · ${minutesLabel(item.duration)} · ${money(item.price)}</small></div>
+            ${removable ? `<button type="button" class="booking-remove" data-remove-service="${index}" aria-label="Remove ${item.service_name}"><i class="fa-solid fa-xmark"></i></button>` : ""}
+        </div>`).join("") : "";
+        container.querySelectorAll("[data-remove-service]").forEach(button => button.addEventListener("click", () => {
+            selectedServices.splice(Number(button.dataset.removeService), 1);
+            syncHiddenFields();
+            renderSelected(serviceSummary, true);
+            renderSelected(currentSelection, true);
+            if (!selectedServices.length) showStep(1);
+            renderTotals();
+        }));
+    }
+
+    function renderTotals() {
+        const duration = selectedServices.reduce((total, item) => total + Number(item.duration), 0);
+        const price = selectedServices.reduce((total, item) => total + Number(item.price), 0);
+        document.getElementById("summaryTotal").textContent = `${minutesLabel(duration)} · ${money(price)}`;
+    }
+
+    function renderServiceSummary() {
+        renderSelected(serviceSummary, true);
+        renderSelected(currentSelection, false);
+        renderTotals();
+    }
+
+    function chooseService(card) {
+        pendingService = {
+            service_id: card.dataset.service,
+            service_name: card.dataset.serviceName,
+            duration: Number(card.dataset.serviceDuration),
+            price: card.dataset.servicePrice,
+        };
+        setError("service", "", document.querySelector(".booking-choice-grid"));
+        document.querySelectorAll(".booking-choice").forEach(item => item.classList.remove("is-selected"));
+        card.classList.add("is-selected");
+        loadStylists(pendingService.service_id);
+    }
+
+    function loadStylists(serviceId) {
+        stylistChoices.innerHTML = "<span class=\"booking-slot-loader\" style=\"display:block\">Checking eligible stylists...</span>";
+        fetch(`/api/eligible-barbers/?service=${encodeURIComponent(serviceId)}`)
+            .then(response => response.json())
+            .then(data => {
+                stylistChoices.innerHTML = "";
+                document.getElementById("stylistPrompt").textContent = data.fallback ? "No specialist is assigned to this service yet. Choose an available stylist." : "Only specialists assigned to this service are shown.";
+                if (!data.barbers?.length) {
+                    stylistChoices.innerHTML = "<span class=\"booking-inline-error\">No stylist is available for this service.</span>";
+                    return;
+                }
+                data.barbers.forEach(barber => {
+                    const card = document.createElement("button");
+                    card.type = "button";
+                    card.className = "booking-choice";
+                    card.innerHTML = `<strong>${barber.name}</strong><small>${barber.role || "Specialist"}</small>`;
+                    card.addEventListener("click", () => {
+                        document.querySelectorAll("#stylistChoices .booking-choice").forEach(item => item.classList.remove("is-selected"));
+                        card.classList.add("is-selected");
+                        setError("stylist", "", stylistChoices);
+                        const existingIndex = selectedServices.findIndex(item => item.service_id === pendingService.service_id);
+                        if (existingIndex >= 0) selectedServices.splice(existingIndex, 1);
+                        selectedServices.push({ ...pendingService, barber_id: String(barber.id), barber_name: barber.name });
+                        syncHiddenFields();
+                        renderServiceSummary();
+                    });
+                    stylistChoices.appendChild(card);
+                });
+                showStep(2);
+            })
+            .catch(() => {
+                stylistChoices.innerHTML = "";
+                setError("stylist", "We could not load stylists right now. Please try again.", stylistChoices);
+                showStep(2);
+            });
+    }
+
+    document.querySelectorAll(".booking-choice[data-service]").forEach(card => card.addEventListener("click", () => chooseService(card)));
+    document.getElementById("addAnotherService").addEventListener("click", () => {
+        pendingService = null;
+        document.querySelectorAll(".booking-choice").forEach(item => item.classList.remove("is-selected"));
+        showStep(1);
+    });
+    document.getElementById("continueServices").addEventListener("click", () => {
+        if (!selectedServices.length) {
+            setError("stylist", "Please select a stylist.", stylistChoices);
+            return;
+        }
+        showStep(3);
+    });
+
+    function buildDates() {
+        const start = new Date("{{ today }}T00:00:00");
+        const selected = dateInput.value || "{{ today }}";
+        dates.innerHTML = "";
+        for (let index = 0; index <= 3; index += 1) {
+            const current = new Date(start);
+            current.setDate(start.getDate() + index);
+            const value = current.toISOString().slice(0, 10);
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = `booking-date${value === selected ? " is-selected" : ""}`;
+            button.innerHTML = `<small>${current.toLocaleDateString(undefined, { weekday: "short" })}</small><strong>${current.getDate()}</strong><small>${current.toLocaleDateString(undefined, { month: "short" })}</small>`;
+            button.addEventListener("click", () => {
+                dates.querySelectorAll(".booking-date").forEach(item => item.classList.remove("is-selected"));
+                button.classList.add("is-selected");
+                dateInput.value = value;
+                timeInput.value = "";
+                setError("date", "", dates);
+            });
+            dates.appendChild(button);
+        }
+    }
+    buildDates();
+
+    function fetchSequentialSlots() {
+        if (!dateInput.value || !selectedServices.length) return;
+        const requestId = ++latestSlotsRequest;
+        document.getElementById("slot-loader").style.display = "block";
+        times.innerHTML = "";
+        const query = encodeURIComponent(JSON.stringify(selectedServices.map(item => ({ service_id: item.service_id, barber_id: item.barber_id || null }))));
+        fetch(`/api/available-slots/?date=${encodeURIComponent(dateInput.value)}&assignments=${query}`)
+            .then(response => response.json())
+            .then(data => {
+                if (requestId !== latestSlotsRequest) return;
+                document.getElementById("slot-loader").style.display = "none";
+                (data.slots || []).forEach(slot => {
+                    const button = document.createElement("button");
+                    button.type = "button";
+                    button.className = "booking-time";
+                    button.textContent = slot.display;
+                    button.addEventListener("click", () => {
+                        times.querySelectorAll(".booking-time").forEach(item => item.classList.remove("is-selected"));
+                        button.classList.add("is-selected");
+                        timeInput.value = slot.value;
+                        setError("time", "", times);
+                    });
+                    times.appendChild(button);
+                });
+                document.getElementById("timePrompt").textContent = data.slots?.length ? "Choose one starting time for your full appointment." : "There are no sequential times available for these stylists.";
+            })
+            .catch(() => {
+                document.getElementById("slot-loader").style.display = "none";
+                setError("time", "We could not load available times right now.", times);
+            });
+    }
+
+    document.querySelectorAll("[data-next]").forEach(button => button.addEventListener("click", () => {
+        const next = Number(button.dataset.next);
+        if (next === 4 && !selectedServices.length) { showStep(1); return; }
+        if (next === 5) {
+            if (!dateInput.value) { setError("date", "Please select a date.", dates); return; }
+            fetchSequentialSlots();
+        }
+        if (next === 6 && !timeInput.value) { setError("time", "Please select a starting time.", times); return; }
+        if (next === 7) {
+            if (!validateDetails()) return;
+            renderFinalSummary();
+        }
+        showStep(next);
+    }));
+    document.querySelectorAll("[data-back]").forEach(button => button.addEventListener("click", () => showStep(Number(button.dataset.back))));
+
+    function validateDetails() {
+        const name = document.getElementById("id_customer_name");
+        const phone = document.getElementById("id_phone_number");
+        const payment = document.getElementById("id_payment_screenshot");
+        let valid = true;
+        if (!name.value.trim()) valid = false;
+        setError("name", name.value.trim() ? "" : "Please enter your name.", name);
+        const normalized = phone.value.replace(/[\s()-]/g, "");
+        const phoneValid = /^\+?\d{9,15}$/.test(normalized);
+        if (!phoneValid) valid = false;
+        setError("phone", normalized ? (phoneValid ? "" : "Please enter a valid phone number.") : "Please enter your phone number.", phone);
+        if (!payment.files.length) valid = false;
+        setError("payment", payment.files.length ? "" : "Please enter your payment information.", payment);
+        return valid;
+    }
+
+    function renderFinalSummary() {
+        let cursor = new Date(`2000-01-01T${timeInput.value}:00`);
+        const rows = selectedServices.map(item => {
+            const start = cursor.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+            cursor = new Date(cursor.getTime() + Number(item.duration) * 60000);
+            const end = cursor.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+            return `<div class="booking-summary-row"><span>${item.service_name}<small style="display:block;color:var(--text-muted);">${item.barber_name || "No specific stylist"} · ${minutesLabel(item.duration)} · ${money(item.price)} · ${start}–${end}</small></span></div>`;
+        }).join("");
+        const duration = selectedServices.reduce((total, item) => total + Number(item.duration), 0);
+        const price = selectedServices.reduce((total, item) => total + Number(item.price), 0);
+        finalSummary.innerHTML = `<div class="booking-summary-row"><span>Date</span><strong>${new Date(`${dateInput.value}T00:00:00`).toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}</strong></div><div class="booking-summary-row"><span>Starting time</span><strong>${document.querySelector(".booking-time.is-selected")?.textContent || "—"}</strong></div>${rows}<div class="booking-summary-row"><span>Total duration</span><strong>${minutesLabel(duration)}</strong></div><div class="booking-summary-row"><span>Total price</span><strong>${money(price)}</strong></div><div class="booking-summary-row"><span>Name</span><strong>${document.getElementById("id_customer_name").value}</strong></div>`;
+    }
+
+    form.addEventListener("submit", event => {
+        syncHiddenFields();
+        if (!selectedServices.length || !dateInput.value || !timeInput.value || !validateDetails()) {
+            event.preventDefault();
+            return;
+        }
+        const button = form.querySelector("button[type=submit]");
+        if (button.dataset.submitting === "true") { event.preventDefault(); return; }
+        button.dataset.submitting = "true";
+        button.classList.add("booking-submit-loading");
+        button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending your request...';
+    });
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("bookingForm");
+    if (!form || form.dataset.multiServiceBooking !== "true") return;
+    const serviceSelect = document.getElementById("id_service");
+    const barberSelect = document.getElementById("id_barber");
+    const dateInput = document.getElementById("id_appointment_date");
+    const timeInput = document.getElementById("id_appointment_time");
+    const assignmentInput = document.getElementById("appointmentServicesInput");
+    const dates = document.getElementById("bookingDates");
+    const times = document.getElementById("bookingTimes");
+    const serviceChoices = document.getElementById("serviceChoices");
+    const stylistChoices = document.getElementById("stylistChoices");
+    const stylistHeading = document.getElementById("stylistHeading");
+    const selectedList = document.getElementById("currentSelection");
+    const summaryList = document.getElementById("serviceSummary");
+    const finalSummary = document.getElementById("finalSummary");
+    const selectedServices = [];
+    let pendingService = null;
+    let slotsRequest = 0;
+
+    const money = value => `${Number(value).toFixed(2).replace(/\.00$/, "")} ETB`;
+    const durationText = value => `${value} min`;
+    function error(key, message, target) {
+        const node = document.querySelector(`[data-error-for="${key}"]`);
+        if (node) node.textContent = message || "";
+        if (target) target.classList.toggle("booking-invalid", Boolean(message));
+        return !message;
+    }
+    function showStage(stage) {
+        document.querySelectorAll(".booking-step").forEach(item => item.classList.toggle("is-active", item.dataset.step === String(stage)));
+        document.querySelectorAll("[data-progress]").forEach(item => item.classList.toggle("is-active", Number(item.dataset.progress) <= stage));
+        window.scrollTo({ top: Math.max(0, form.getBoundingClientRect().top + window.scrollY - 16), behavior: "smooth" });
+    }
+    function syncFields() {
+        const first = selectedServices[0];
+        serviceSelect.value = first ? first.service_id : "";
+        barberSelect.value = first?.barber_id || "";
+        assignmentInput.value = JSON.stringify(selectedServices.map(item => ({ service_id: item.service_id, barber_id: item.barber_id })));
+    }
+    function renderList(container, allowEdit) {
+        container.innerHTML = selectedServices.map((item, index) => `<div class="booking-selected-item"><div><strong>${item.service_name}</strong><small>${item.barber_name} · ${durationText(item.duration)} · ${money(item.price)}</small></div>${allowEdit ? `<span><button type="button" class="booking-remove" data-edit-service="${index}"><i class="fa-solid fa-pen"></i> Edit</button><button type="button" class="booking-remove" data-remove-service="${index}" aria-label="Remove ${item.service_name}"><i class="fa-solid fa-xmark"></i></button></span>` : ""}</div>`).join("");
+        container.querySelectorAll("[data-edit-service]").forEach(button => button.addEventListener("click", () => {
+            const item = selectedServices[Number(button.dataset.editService)];
+            pendingService = { ...item };
+            selectedServices.splice(Number(button.dataset.editService), 1);
+            syncFields();
+            document.querySelectorAll(".booking-choice").forEach(card => card.classList.toggle("is-selected", card.dataset.service === item.service_id));
+            loadStylists(item.service_id, item.barber_id);
+        }));
+        container.querySelectorAll("[data-remove-service]").forEach(button => button.addEventListener("click", () => {
+            selectedServices.splice(Number(button.dataset.removeService), 1);
+            syncFields();
+            renderSelections();
+            if (!selectedServices.length) showStage(1);
+        }));
+    }
+    function renderSelections() {
+        renderList(selectedList, true);
+        renderList(summaryList, true);
+        const totalDuration = selectedServices.reduce((sum, item) => sum + Number(item.duration), 0);
+        const totalPrice = selectedServices.reduce((sum, item) => sum + Number(item.price), 0);
+        document.getElementById("summaryTotal").textContent = `${durationText(totalDuration)} · ${money(totalPrice)}`;
+    }
+    function chooseService(card) {
+        pendingService = { service_id: card.dataset.service, service_name: card.dataset.serviceName, duration: card.dataset.serviceDuration, price: card.dataset.servicePrice };
+        serviceChoices.querySelectorAll(".booking-choice").forEach(item => item.classList.remove("is-selected"));
+        card.classList.add("is-selected");
+        error("service", "", serviceChoices);
+        loadStylists(pendingService.service_id, pendingService.barber_id);
+    }
+    function loadStylists(serviceId, selectedBarberId) {
+        stylistHeading.style.display = "block";
+        stylistChoices.innerHTML = "<span class=\"booking-slot-loader\" style=\"display:block\">Checking eligible stylists...</span>";
+        fetch(`/api/eligible-barbers/?service=${encodeURIComponent(serviceId)}`)
+            .then(response => response.json())
+            .then(data => {
+                stylistChoices.innerHTML = "";
+                document.getElementById("stylistPrompt").textContent = data.fallback ? "No service assignment exists yet. Choose an available stylist." : "Only stylists assigned to this service are shown.";
+                (data.barbers || []).forEach(barber => {
+                    const card = document.createElement("button");
+                    card.type = "button";
+                    card.className = `booking-choice${String(barber.id) === String(selectedBarberId) ? " is-selected" : ""}`;
+                    card.innerHTML = `<strong>${barber.name}</strong><small>${barber.role || "Specialist"}</small>`;
+                    card.addEventListener("click", () => {
+                        stylistChoices.querySelectorAll(".booking-choice").forEach(item => item.classList.remove("is-selected"));
+                        card.classList.add("is-selected");
+                        const existing = selectedServices.findIndex(item => item.service_id === pendingService.service_id);
+                        if (existing >= 0) selectedServices.splice(existing, 1);
+                        selectedServices.push({ ...pendingService, barber_id: String(barber.id), barber_name: barber.name });
+                        pendingService = null;
+                        syncFields();
+                        renderSelections();
+                        error("stylist", "", stylistChoices);
+                    });
+                    stylistChoices.appendChild(card);
+                });
+                if (!data.barbers?.length) error("stylist", "No stylist is available for this service.", stylistChoices);
+            })
+            .catch(() => error("stylist", "We could not load stylists right now. Please try again.", stylistChoices));
+    }
+    serviceChoices.querySelectorAll("[data-service]").forEach(card => card.addEventListener("click", () => chooseService(card)));
+    document.getElementById("addAnotherService").addEventListener("click", () => {
+        pendingService = null;
+        stylistHeading.style.display = "none";
+        stylistChoices.innerHTML = "";
+        serviceChoices.querySelectorAll(".booking-choice").forEach(card => card.classList.remove("is-selected"));
+    });
+    document.getElementById("continueServices").addEventListener("click", () => {
+        if (!selectedServices.length) { error("service", "Please select a service.", serviceChoices); return; }
+        if (pendingService) { error("stylist", "Please select a stylist.", stylistChoices); return; }
+        const assignments = encodeURIComponent(JSON.stringify(selectedServices.map(item => ({ service_id: item.service_id, barber_id: item.barber_id }))));
+        fetch(`/api/available-slots/?date=${encodeURIComponent(dateInput.value)}&assignments=${assignments}`).then(response => response.json()).then(data => {
+            if (timeInput.value && !(data.slots || []).some(slot => slot.value === timeInput.value)) {
+                error("time", "This stylist is not available for the selected time.", times);
+                showStage(1);
+                return;
+            }
+            renderSelections();
+            showStage(3);
+        }).catch(() => error("time", "We could not validate the complete appointment right now.", times));
+    });
+    function buildDates() {
+        const start = new Date("{{ today }}T00:00:00");
+        dates.innerHTML = "";
+        for (let index = 0; index <= 3; index += 1) {
+            const current = new Date(start);
+            current.setDate(start.getDate() + index);
+            const value = current.toISOString().slice(0, 10);
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = `booking-date${value === dateInput.value ? " is-selected" : ""}`;
+            button.innerHTML = `<small>${current.toLocaleDateString(undefined, { weekday: "short" })}</small><strong>${current.getDate()}</strong><small>${current.toLocaleDateString(undefined, { month: "short" })}</small>`;
+            button.addEventListener("click", () => { dates.querySelectorAll(".booking-date").forEach(item => item.classList.remove("is-selected")); button.classList.add("is-selected"); dateInput.value = value; timeInput.value = ""; loadSlots(); });
+            dates.appendChild(button);
+        }
+    }
+    function loadSlots() {
+        if (!dateInput.value) return;
+        const requestId = ++slotsRequest;
+        document.getElementById("slot-loader").style.display = "block";
+        times.innerHTML = "";
+        const assignments = encodeURIComponent(JSON.stringify(selectedServices.map(item => ({ service_id: item.service_id, barber_id: item.barber_id }))));
+        fetch(`/api/available-slots/?date=${encodeURIComponent(dateInput.value)}&assignments=${assignments}`).then(response => response.json()).then(data => {
+            if (requestId !== slotsRequest) return;
+            document.getElementById("slot-loader").style.display = "none";
+            (data.slots || []).forEach(slot => { const button = document.createElement("button"); button.type = "button"; button.className = "booking-time"; button.textContent = slot.display; button.addEventListener("click", () => { times.querySelectorAll(".booking-time").forEach(item => item.classList.remove("is-selected")); button.classList.add("is-selected"); timeInput.value = slot.value; renderFinalSummary(); }); times.appendChild(button); });
+            document.getElementById("timePrompt").textContent = data.slots?.length ? "Choose one starting time for the complete appointment." : "No starting times fit all selected stylists.";
+        }).catch(() => { document.getElementById("slot-loader").style.display = "none"; error("time", "We could not load starting times right now.", times); });
+    }
+    function renderFinalSummary() {
+        if (!timeInput.value) return;
+        let cursor = new Date(`2000-01-01T${timeInput.value}:00`);
+        const rows = selectedServices.map(item => { const start = cursor.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" }); cursor = new Date(cursor.getTime() + Number(item.duration) * 60000); const end = cursor.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" }); return `<div class="booking-summary-row"><span>${item.service_name}<small style="display:block;color:var(--text-muted);">${item.barber_name} · ${start}–${end} · ${durationText(item.duration)} · ${money(item.price)}</small></span><button type="button" class="booking-remove" data-edit-service="${selectedServices.indexOf(item)}">Edit</button></div>`; }).join("");
+        const totalDuration = selectedServices.reduce((sum, item) => sum + Number(item.duration), 0);
+        const totalPrice = selectedServices.reduce((sum, item) => sum + Number(item.price), 0);
+        finalSummary.innerHTML = `<div class="booking-summary-row"><span>Date</span><strong>${new Date(`${dateInput.value}T00:00:00`).toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}</strong></div><div class="booking-summary-row"><span>Starting time</span><strong>${document.querySelector(".booking-time.is-selected")?.textContent || "—"}</strong></div>${rows}<div class="booking-summary-row"><span>Total duration</span><strong>${durationText(totalDuration)}</strong></div><div class="booking-summary-row"><span>Total price</span><strong>${money(totalPrice)}</strong></div><div class="booking-summary-row"><span>Customer</span><strong>${document.getElementById("id_customer_name").value || "—"}</strong></div><div class="booking-summary-row"><span>Phone</span><strong>${document.getElementById("id_phone_number").value || "—"}</strong></div>`;
+        finalSummary.querySelectorAll("[data-edit-service]").forEach(button => button.addEventListener("click", () => { const item = selectedServices[Number(button.dataset.editService)]; pendingService = { ...item }; selectedServices.splice(Number(button.dataset.editService), 1); syncFields(); showStage(1); loadStylists(item.service_id, item.barber_id); }));
+    }
+    document.querySelectorAll("[data-next]").forEach(button => button.addEventListener("click", () => {
+        const next = Number(button.dataset.next);
+        if (next === 3) {
+            if (!selectedServices.length || pendingService) { error("stylist", "Please select a stylist.", stylistChoices); showStage(1); return; }
+            renderSelections();
+            showStage(3);
+        } else if (next === 4) {
+            if (!dateInput.value) { error("date", "Please select a date.", dates); return; }
+            loadSlots();
+            showStage(4);
+        } else if (next === 5) {
+            if (!timeInput.value) { error("time", "Please select a starting time.", times); return; }
+            renderFinalSummary();
+            showStage(5);
+        } else if (next === 6) {
+            if (!validateDetails()) return;
+            renderFinalSummary();
+            showStage(6);
+        }
+    }));
+    document.querySelectorAll("[data-back]").forEach(button => button.addEventListener("click", () => showStage(Number(button.dataset.back))));
+    function validateDetails() {
+        const name = document.getElementById("id_customer_name");
+        const phone = document.getElementById("id_phone_number");
+        const payment = document.getElementById("id_payment_screenshot");
+        const normalizedPhone = phone.value.replace(/[\s()-]/g, "");
+        let valid = true;
+        if (!name.value.trim()) valid = false;
+        error("name", name.value.trim() ? "" : "Please enter your name.", name);
+        const phoneValid = /^\+?\d{9,15}$/.test(normalizedPhone);
+        if (!phoneValid) valid = false;
+        error("phone", phoneValid ? "" : (normalizedPhone ? "Please enter a valid phone number." : "Please enter your phone number."), phone);
+        if (!payment.files.length) valid = false;
+        error("payment", payment.files.length ? "" : "Please enter your payment information.", payment);
+        return valid;
+    }
+    form.addEventListener("submit", event => { syncFields(); if (!selectedServices.length || !dateInput.value || !timeInput.value || !validateDetails()) { event.preventDefault(); return; } const button = form.querySelector("button[type=submit]"); if (button.dataset.submitting === "true") { event.preventDefault(); return; } button.dataset.submitting = "true"; button.classList.add("booking-submit-loading"); button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending your request...'; });
+    buildDates();
+    if (dateInput.value) loadSlots();
 });
 </script>
 
