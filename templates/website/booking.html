@@ -59,6 +59,7 @@
     .booking-choice.is-disabled { opacity: .5; cursor: not-allowed; }
     .booking-service-focus { border-radius: 8px; box-shadow: 0 0 0 3px rgba(197, 155, 83, .16); transition: box-shadow .2s ease; }
     .booking-service-focus:focus { outline: none; }
+    #serviceSelectionHeading { scroll-margin-top: clamp(24px, 8vh, 72px); }
     @keyframes booking-step-in { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     @media (max-width: 560px) {
         .booking-page { padding-top: 24px; }
@@ -144,7 +145,7 @@
                             {% endfor %}
                         </div>
                         <span class="booking-inline-error" data-error-for="service" role="alert">{% if form.service.errors %}{{ form.service.errors.0 }}{% endif %}</span>
-                        <div class="booking-step-heading" id="stylistHeading" style="display: none; margin-top: 20px;"><h3>Choose a stylist</h3><p id="stylistPrompt">Only stylists assigned to this service are shown.</p></div>
+                        <div class="booking-step-heading" id="stylistHeading" tabindex="-1" style="display: none; margin-top: 20px;"><h3>Choose a stylist</h3><p id="stylistPrompt">Only stylists assigned to this service are shown.</p></div>
                         <div class="booking-choice-grid" id="stylistChoices"></div>
                         <span class="booking-inline-error" data-error-for="stylist" role="alert"></span>
                         <div class="booking-selected-list" id="currentSelection"></div>
@@ -722,10 +723,15 @@ document.addEventListener("DOMContentLoaded", function () {
         error("service", "", serviceChoices);
         loadStylists(pendingService.service_id, pendingService.barber_id);
     }
+    function guideToStylists() {
+        stylistHeading.scrollIntoView({ behavior: "smooth", block: "start" });
+        window.setTimeout(() => stylistHeading.focus({ preventScroll: true }), 300);
+    }
     function loadStylists(serviceId, selectedBarberId) {
         const requestId = ++stylistRequest;
         stylistHeading.style.display = "block";
         stylistChoices.innerHTML = "<span class=\"booking-slot-loader\" style=\"display:block\">Loading available stylists...</span>";
+        guideToStylists();
         fetch(`/api/eligible-barbers/?service=${encodeURIComponent(serviceId)}`)
             .then(response => {
                 if (!response.ok) throw new Error("Unable to load stylists.");
@@ -769,9 +775,8 @@ document.addEventListener("DOMContentLoaded", function () {
         stylistChoices.innerHTML = "";
         serviceChoices.querySelectorAll(".booking-choice").forEach(card => card.classList.remove("is-selected"));
         const serviceSelection = document.getElementById("serviceSelection");
-        const serviceHeading = document.getElementById("serviceSelectionHeading");
         serviceSelection.classList.add("booking-service-focus");
-        serviceSelection.scrollIntoView({ behavior: "smooth", block: "center" });
+        document.getElementById("serviceSelectionHeading").scrollIntoView({ behavior: "smooth", block: "start" });
         window.setTimeout(() => {
             serviceSelection.focus({ preventScroll: true });
             window.setTimeout(() => serviceSelection.classList.remove("booking-service-focus"), 700);
