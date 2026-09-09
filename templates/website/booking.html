@@ -44,6 +44,8 @@
     .booking-summary-row span { color: var(--text-muted); }
     .booking-hidden-field { display: none; }
     .booking-page .booking-payment-guide { margin-top: 0; }
+    .booking-page .booking-details-fields { margin-bottom: 28px; }
+    .booking-page .booking-file-upload { margin-top: 24px; }
     .booking-inline-error { display: block; min-height: 1.25em; color: #b44a4a; font-size: .82rem; margin-top: 7px; }
     .booking-inline-error:empty { display: none; }
     .booking-invalid { border-color: #b44a4a !important; box-shadow: 0 0 0 2px rgba(180, 74, 74, .12); }
@@ -85,7 +87,9 @@
         .booking-summary { padding: 14px; margin: 16px 0; }
         .booking-summary-row { align-items: baseline; gap: 10px; font-size: .9rem; }
         .booking-summary-row strong { text-align: right; overflow-wrap: anywhere; }
+        .booking-details-fields { margin-bottom: 24px; }
         .booking-payment-guide { padding: 16px; }
+        .booking-page .booking-file-upload { margin-top: 24px; }
         .booking-payment-guide h4 { font-size: 1rem; }
         .booking-label { gap: 8px; font-size: .86rem; }
         .booking-page input, .booking-page select, .booking-page textarea { max-width: 100%; font-size: 16px; }
@@ -175,13 +179,12 @@
                     </section>
 
                     <section class="booking-step" data-step="5">
-                        <div class="booking-step-heading"><h3>Your details</h3><p>Just the essentials so we can prepare for your visit.</p></div>
-                        <div class="booking-form-row">
+                        <div class="booking-step-heading"><h3>Your details</h3><p>Please provide your details to complete your booking.</p></div>
+                        <div class="booking-form-row booking-details-fields">
                             <div class="booking-form-group"><label class="booking-label"><i class="fa-solid fa-user"></i> Full Name *</label>{{ form.customer_name }}<span class="booking-inline-error" data-error-for="name" role="alert">{% if form.customer_name.errors %}{{ form.customer_name.errors.0 }}{% endif %}</span></div>
                             <div class="booking-form-group"><label class="booking-label"><i class="fa-solid fa-phone"></i> Phone Number *</label>{{ form.phone_number }}<span class="booking-inline-error" data-error-for="phone" role="alert">{% if form.phone_number.errors %}{{ form.phone_number.errors.0 }}{% endif %}</span></div>
                         </div>
-                        <div class="booking-form-group"><label class="booking-label"><i class="fa-solid fa-comment-dots"></i> Notes <small>(Optional)</small></label>{{ form.notes }}</div>
-                        <div class="booking-payment-guide"><h4><i class="fa-solid fa-wallet"></i> Payment Instructions &amp; Deposit</h4><div class="payment-instructions-content">{{ shop.payment_instructions|default:"Please transfer the appointment fee using CBE or Telebirr and attach your receipt below to secure your booking." }}</div></div>
+                        <div class="booking-payment-guide"><h4><i class="fa-solid fa-wallet"></i> Booking Deposit</h4><div class="payment-instructions-content">{{ shop.payment_instructions|default:"Please transfer the appointment fee using CBE or Telebirr and attach your receipt below to secure your booking." }}</div></div>
                         <div class="booking-file-upload"><label class="booking-label"><i class="fa-solid fa-file-arrow-up"></i> Payment Receipt / Screenshot *</label>{{ form.payment_screenshot }}<div class="booking-file-hint"><i class="fa-solid fa-circle-info"></i> Upload a clear image of your transfer receipt.</div><span class="booking-inline-error" data-error-for="payment" role="alert">{% if form.payment_screenshot.errors %}{{ form.payment_screenshot.errors.0 }}{% endif %}</span></div>
                         <div class="booking-step-actions"><button type="button" class="button button-ghost" data-back="4"><i class="fa-solid fa-arrow-left"></i> Back</button><button type="button" class="button button-primary" data-next="6">Review appointment <i class="fa-solid fa-arrow-right"></i></button></div>
                     </section>
