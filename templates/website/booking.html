@@ -18,24 +18,23 @@
     .booking-step-heading h3 { margin: 0 0 5px; color: var(--text); }
     .booking-step-heading p { margin: 0; color: var(--text-muted); font-size: .92rem; }
     .booking-choice-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
-    .booking-choice { position: relative; min-height: 92px; text-align: left; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-card); color: var(--text); padding: 17px; cursor: pointer; transition: border-color .18s ease, transform .18s ease, background .18s ease; }
+    .booking-choice { position: relative; min-height: 92px; text-align: left; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-card); color: var(--text); padding: 17px; cursor: pointer; touch-action: manipulation; transition: border-color .18s ease, transform .18s ease, background .18s ease; }
     .booking-choice:hover { transform: translateY(-2px); border-color: var(--gold); }
     .booking-choice.is-selected { border-color: var(--gold); background: var(--gold-soft); box-shadow: 0 0 0 2px rgba(197, 155, 83, .18); }
     .booking-choice strong, .booking-choice small { display: block; }
     .booking-choice strong { margin-bottom: 9px; }
     .booking-choice small { color: var(--text-muted); }
-    .booking-choice .booking-price { color: var(--gold); font-weight: 700; font-size: 1rem; }
     .booking-choice .booking-check { position: absolute; right: 13px; top: 13px; color: var(--gold); opacity: 0; }
     .booking-choice.is-selected .booking-check { opacity: 1; }
     .booking-date-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-    .booking-date { min-height: 86px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-card); color: var(--text); padding: 15px 8px; cursor: pointer; }
+    .booking-date { min-height: 86px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-card); color: var(--text); padding: 15px 8px; cursor: pointer; touch-action: manipulation; }
     .booking-date strong, .booking-date small { display: block; }
     .booking-date strong { font-size: 1.2rem; margin: 4px 0; }
     .booking-date small { color: var(--text-muted); }
     .booking-date.is-selected { background: var(--gold); border-color: var(--gold); color: #17120c; }
     .booking-date.is-selected small { color: #17120c; }
     .booking-time-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(125px, 1fr)); gap: 10px; }
-    .booking-time { min-height: 50px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-card); color: var(--text); padding: 14px 8px; cursor: pointer; font-weight: 600; }
+    .booking-time { min-height: 50px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-card); color: var(--text); padding: 14px 8px; cursor: pointer; touch-action: manipulation; font-weight: 600; }
     .booking-time:hover, .booking-time.is-selected { border-color: var(--gold); background: var(--gold-soft); color: var(--gold); }
     .booking-time:disabled { cursor: not-allowed; opacity: .38; text-decoration: line-through; }
     .booking-step-actions { display: flex; justify-content: space-between; gap: 12px; margin-top: 25px; }
@@ -58,6 +57,8 @@
     .booking-total { display: flex; justify-content: space-between; gap: 12px; padding-top: 13px; border-top: 1px solid var(--border); color: var(--text-muted); }
     .booking-total strong { color: var(--gold); }
     .booking-choice.is-disabled { opacity: .5; cursor: not-allowed; }
+    .booking-service-focus { border-radius: 8px; box-shadow: 0 0 0 3px rgba(197, 155, 83, .16); transition: box-shadow .2s ease; }
+    .booking-service-focus:focus { outline: none; }
     @keyframes booking-step-in { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     @media (max-width: 560px) {
         .booking-page { padding-top: 24px; }
@@ -79,6 +80,7 @@
         .booking-time { min-height: 52px; padding: 13px 5px; }
         .booking-step-actions { flex-direction: column-reverse; gap: 9px; margin-top: 22px; }
         .booking-step-actions .button { width: 100%; min-height: 50px; justify-content: center; }
+        .booking-step-actions > div { width: 100%; flex-direction: column; gap: 9px !important; }
         .booking-summary { padding: 14px; margin: 16px 0; }
         .booking-summary-row { align-items: baseline; gap: 10px; font-size: .9rem; }
         .booking-summary-row strong { text-align: right; overflow-wrap: anywhere; }
@@ -132,12 +134,12 @@
                     {% csrf_token %}
                     <div class="booking-hidden-field">{{ form.service }}{{ form.barber }}{{ form.appointment_date }}{{ form.appointment_time }}<input type="hidden" id="appointmentServicesInput" name="appointment_services"></div>
 
-                    <section class="booking-step is-active" data-step="1">
-                        <div class="booking-step-heading"><h3>Build your appointment</h3><p>Select a service, then choose its eligible stylist.</p></div>
+                    <section class="booking-step is-active" data-step="1" id="serviceSelection" tabindex="-1" aria-labelledby="serviceSelectionHeading">
+                        <div class="booking-step-heading" id="serviceSelectionHeading"><h3>Build your appointment</h3><p>Select a service, then choose its eligible stylist.</p></div>
                         <div class="booking-choice-grid" id="serviceChoices">
                             {% for service in services %}
                                 <button type="button" class="booking-choice" data-service="{{ service.id }}" data-service-name="{{ service.name }}" data-service-price="{{ service.price }}" data-service-duration="{{ service.duration }}">
-                                    <i class="fa-solid fa-check booking-check"></i><strong>{{ service.name }}</strong><span class="booking-price">{{ service.price }} ETB</span><small>About {{ service.duration }} minutes</small>
+                                    <i class="fa-solid fa-check booking-check"></i><strong>{{ service.name }}</strong><small>About {{ service.duration }} minutes</small>
                                 </button>
                             {% endfor %}
                         </div>
@@ -365,7 +367,6 @@ document.addEventListener("DOMContentLoaded", function() {
             document.getElementById("summaryService").textContent = selectedService ? selectedService.dataset.serviceName : "—";
             document.getElementById("summaryDate").textContent = new Date(`${dateInput.value}T00:00:00`).toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
             document.getElementById("summaryTime").textContent = document.querySelector(".booking-time.is-selected")?.textContent || "—";
-            document.getElementById("summaryPrice").textContent = selectedService ? `${selectedService.dataset.servicePrice} ETB` : "—";
             document.getElementById("summaryName").textContent = document.getElementById("id_customer_name").value || "—";
         }
         showStep(next);
@@ -444,7 +445,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function renderSelected(container, removable) {
         container.innerHTML = selectedServices.length ? selectedServices.map((item, index) => `<div class="booking-selected-item">
-            <div><strong>${item.service_name}</strong><small>${item.barber_name || "No specific stylist"} · ${minutesLabel(item.duration)} · ${money(item.price)}</small></div>
+            <div><strong>${item.service_name}</strong><small>${item.barber_name || "No specific stylist"} · ${minutesLabel(item.duration)}</small></div>
             ${removable ? `<button type="button" class="booking-remove" data-remove-service="${index}" aria-label="Remove ${item.service_name}"><i class="fa-solid fa-xmark"></i></button>` : ""}
         </div>`).join("") : "";
         container.querySelectorAll("[data-remove-service]").forEach(button => button.addEventListener("click", () => {
@@ -459,8 +460,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function renderTotals() {
         const duration = selectedServices.reduce((total, item) => total + Number(item.duration), 0);
-        const price = selectedServices.reduce((total, item) => total + Number(item.price), 0);
-        document.getElementById("summaryTotal").textContent = `${minutesLabel(duration)} · ${money(price)}`;
+        document.getElementById("summaryTotal").textContent = minutesLabel(duration);
     }
 
     function renderServiceSummary() {
@@ -627,11 +627,10 @@ document.addEventListener("DOMContentLoaded", function () {
             const start = cursor.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
             cursor = new Date(cursor.getTime() + Number(item.duration) * 60000);
             const end = cursor.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
-            return `<div class="booking-summary-row"><span>${item.service_name}<small style="display:block;color:var(--text-muted);">${item.barber_name || "No specific stylist"} · ${minutesLabel(item.duration)} · ${money(item.price)} · ${start}–${end}</small></span></div>`;
+            return `<div class="booking-summary-row"><span>${item.service_name}<small style="display:block;color:var(--text-muted);">${item.barber_name || "No specific stylist"} · ${minutesLabel(item.duration)} · ${start}–${end}</small></span></div>`;
         }).join("");
         const duration = selectedServices.reduce((total, item) => total + Number(item.duration), 0);
-        const price = selectedServices.reduce((total, item) => total + Number(item.price), 0);
-        finalSummary.innerHTML = `<div class="booking-summary-row"><span>Date</span><strong>${new Date(`${dateInput.value}T00:00:00`).toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}</strong></div><div class="booking-summary-row"><span>Starting time</span><strong>${document.querySelector(".booking-time.is-selected")?.textContent || "—"}</strong></div>${rows}<div class="booking-summary-row"><span>Total duration</span><strong>${minutesLabel(duration)}</strong></div><div class="booking-summary-row"><span>Total price</span><strong>${money(price)}</strong></div><div class="booking-summary-row"><span>Name</span><strong>${document.getElementById("id_customer_name").value}</strong></div>`;
+        finalSummary.innerHTML = `<div class="booking-summary-row"><span>Date</span><strong>${new Date(`${dateInput.value}T00:00:00`).toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}</strong></div><div class="booking-summary-row"><span>Starting time</span><strong>${document.querySelector(".booking-time.is-selected")?.textContent || "—"}</strong></div>${rows}<div class="booking-summary-row"><span>Total duration</span><strong>${minutesLabel(duration)}</strong></div><div class="booking-summary-row"><span>Name</span><strong>${document.getElementById("id_customer_name").value}</strong></div>`;
     }
 
     form.addEventListener("submit", event => {
@@ -669,6 +668,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const selectedServices = [];
     let pendingService = null;
     let slotsRequest = 0;
+    let stylistRequest = 0;
 
     const money = value => `${Number(value).toFixed(2).replace(/\.00$/, "")} ETB`;
     const durationText = value => `${value} min`;
@@ -681,7 +681,10 @@ document.addEventListener("DOMContentLoaded", function () {
     function showStage(stage) {
         document.querySelectorAll(".booking-step").forEach(item => item.classList.toggle("is-active", item.dataset.step === String(stage)));
         document.querySelectorAll("[data-progress]").forEach(item => item.classList.toggle("is-active", Number(item.dataset.progress) <= stage));
-        window.scrollTo({ top: Math.max(0, form.getBoundingClientRect().top + window.scrollY - 16), behavior: "smooth" });
+        const cardTop = form.getBoundingClientRect().top;
+        if (cardTop < -24 || cardTop > 24) {
+            window.scrollTo({ top: Math.max(0, cardTop + window.scrollY - 16), behavior: "smooth" });
+        }
     }
     function syncFields() {
         const first = selectedServices[0];
@@ -690,7 +693,7 @@ document.addEventListener("DOMContentLoaded", function () {
         assignmentInput.value = JSON.stringify(selectedServices.map(item => ({ service_id: item.service_id, barber_id: item.barber_id })));
     }
     function renderList(container, allowEdit) {
-        container.innerHTML = selectedServices.map((item, index) => `<div class="booking-selected-item"><div><strong>${item.service_name}</strong><small>${item.barber_name} · ${durationText(item.duration)} · ${money(item.price)}</small></div>${allowEdit ? `<span><button type="button" class="booking-remove" data-edit-service="${index}"><i class="fa-solid fa-pen"></i> Edit</button><button type="button" class="booking-remove" data-remove-service="${index}" aria-label="Remove ${item.service_name}"><i class="fa-solid fa-xmark"></i></button></span>` : ""}</div>`).join("");
+        container.innerHTML = selectedServices.map((item, index) => `<div class="booking-selected-item"><div><strong>${item.service_name}</strong><small>${item.barber_name} · ${durationText(item.duration)}</small></div>${allowEdit ? `<span><button type="button" class="booking-remove" data-edit-service="${index}"><i class="fa-solid fa-pen"></i> Edit</button><button type="button" class="booking-remove" data-remove-service="${index}" aria-label="Remove ${item.service_name}"><i class="fa-solid fa-xmark"></i></button></span>` : ""}</div>`).join("");
         container.querySelectorAll("[data-edit-service]").forEach(button => button.addEventListener("click", () => {
             const item = selectedServices[Number(button.dataset.editService)];
             pendingService = { ...item };
@@ -710,8 +713,7 @@ document.addEventListener("DOMContentLoaded", function () {
         renderList(selectedList, true);
         renderList(summaryList, true);
         const totalDuration = selectedServices.reduce((sum, item) => sum + Number(item.duration), 0);
-        const totalPrice = selectedServices.reduce((sum, item) => sum + Number(item.price), 0);
-        document.getElementById("summaryTotal").textContent = `${durationText(totalDuration)} · ${money(totalPrice)}`;
+        document.getElementById("summaryTotal").textContent = durationText(totalDuration);
     }
     function chooseService(card) {
         pendingService = { service_id: card.dataset.service, service_name: card.dataset.serviceName, duration: card.dataset.serviceDuration, price: card.dataset.servicePrice };
@@ -721,11 +723,16 @@ document.addEventListener("DOMContentLoaded", function () {
         loadStylists(pendingService.service_id, pendingService.barber_id);
     }
     function loadStylists(serviceId, selectedBarberId) {
+        const requestId = ++stylistRequest;
         stylistHeading.style.display = "block";
-        stylistChoices.innerHTML = "<span class=\"booking-slot-loader\" style=\"display:block\">Checking eligible stylists...</span>";
+        stylistChoices.innerHTML = "<span class=\"booking-slot-loader\" style=\"display:block\">Loading available stylists...</span>";
         fetch(`/api/eligible-barbers/?service=${encodeURIComponent(serviceId)}`)
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) throw new Error("Unable to load stylists.");
+                return response.json();
+            })
             .then(data => {
+                if (requestId !== stylistRequest) return;
                 stylistChoices.innerHTML = "";
                 document.getElementById("stylistPrompt").textContent = data.fallback ? "No service assignment exists yet. Choose an available stylist." : "Only stylists assigned to this service are shown.";
                 (data.barbers || []).forEach(barber => {
@@ -748,7 +755,12 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
                 if (!data.barbers?.length) error("stylist", "No stylist is available for this service.", stylistChoices);
             })
-            .catch(() => error("stylist", "We could not load stylists right now. Please try again.", stylistChoices));
+            .catch(() => {
+                if (requestId !== stylistRequest) return;
+                stylistChoices.innerHTML = '<button type="button" class="button button-ghost" id="retryStylists">Try again</button>';
+                error("stylist", "We could not load stylists right now.", stylistChoices);
+                document.getElementById("retryStylists").addEventListener("click", () => loadStylists(serviceId, selectedBarberId));
+            });
     }
     serviceChoices.querySelectorAll("[data-service]").forEach(card => card.addEventListener("click", () => chooseService(card)));
     document.getElementById("addAnotherService").addEventListener("click", () => {
@@ -756,20 +768,27 @@ document.addEventListener("DOMContentLoaded", function () {
         stylistHeading.style.display = "none";
         stylistChoices.innerHTML = "";
         serviceChoices.querySelectorAll(".booking-choice").forEach(card => card.classList.remove("is-selected"));
+        const serviceSelection = document.getElementById("serviceSelection");
+        const serviceHeading = document.getElementById("serviceSelectionHeading");
+        serviceSelection.classList.add("booking-service-focus");
+        serviceSelection.scrollIntoView({ behavior: "smooth", block: "center" });
+        window.setTimeout(() => {
+            serviceSelection.focus({ preventScroll: true });
+            window.setTimeout(() => serviceSelection.classList.remove("booking-service-focus"), 700);
+        }, 350);
     });
     document.getElementById("continueServices").addEventListener("click", () => {
         if (!selectedServices.length) { error("service", "Please select a service.", serviceChoices); return; }
         if (pendingService) { error("stylist", "Please select a stylist.", stylistChoices); return; }
-        const assignments = encodeURIComponent(JSON.stringify(selectedServices.map(item => ({ service_id: item.service_id, barber_id: item.barber_id }))));
-        fetch(`/api/available-slots/?date=${encodeURIComponent(dateInput.value)}&assignments=${assignments}`).then(response => response.json()).then(data => {
-            if (timeInput.value && !(data.slots || []).some(slot => slot.value === timeInput.value)) {
-                error("time", "This stylist is not available for the selected time.", times);
-                showStage(1);
-                return;
-            }
+        const button = document.getElementById("continueServices");
+        button.disabled = true;
+        button.textContent = "Continuing...";
+        window.setTimeout(() => {
             renderSelections();
-            showStage(3);
-        }).catch(() => error("time", "We could not validate the complete appointment right now.", times));
+            showStage(2);
+            button.disabled = false;
+            button.innerHTML = 'Continue <i class="fa-solid fa-arrow-right"></i>';
+        }, 160);
     });
     function buildDates() {
         const start = new Date("{{ today }}T00:00:00");
@@ -792,20 +811,27 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("slot-loader").style.display = "block";
         times.innerHTML = "";
         const assignments = encodeURIComponent(JSON.stringify(selectedServices.map(item => ({ service_id: item.service_id, barber_id: item.barber_id }))));
-        fetch(`/api/available-slots/?date=${encodeURIComponent(dateInput.value)}&assignments=${assignments}`).then(response => response.json()).then(data => {
+        fetch(`/api/available-slots/?date=${encodeURIComponent(dateInput.value)}&assignments=${assignments}`).then(response => {
+            if (!response.ok) throw new Error("Unable to load times.");
+            return response.json();
+        }).then(data => {
             if (requestId !== slotsRequest) return;
             document.getElementById("slot-loader").style.display = "none";
             (data.slots || []).forEach(slot => { const button = document.createElement("button"); button.type = "button"; button.className = "booking-time"; button.textContent = slot.display; button.addEventListener("click", () => { times.querySelectorAll(".booking-time").forEach(item => item.classList.remove("is-selected")); button.classList.add("is-selected"); timeInput.value = slot.value; renderFinalSummary(); }); times.appendChild(button); });
             document.getElementById("timePrompt").textContent = data.slots?.length ? "Choose one starting time for the complete appointment." : "No starting times fit all selected stylists.";
-        }).catch(() => { document.getElementById("slot-loader").style.display = "none"; error("time", "We could not load starting times right now.", times); });
+        }).catch(() => {
+            document.getElementById("slot-loader").style.display = "none";
+            times.innerHTML = '<button type="button" class="button button-ghost" id="retryTimes">Try again</button>';
+            error("time", "We could not load starting times right now.", times);
+            document.getElementById("retryTimes").addEventListener("click", loadSlots);
+        });
     }
     function renderFinalSummary() {
         if (!timeInput.value) return;
         let cursor = new Date(`2000-01-01T${timeInput.value}:00`);
-        const rows = selectedServices.map(item => { const start = cursor.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" }); cursor = new Date(cursor.getTime() + Number(item.duration) * 60000); const end = cursor.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" }); return `<div class="booking-summary-row"><span>${item.service_name}<small style="display:block;color:var(--text-muted);">${item.barber_name} · ${start}–${end} · ${durationText(item.duration)} · ${money(item.price)}</small></span><button type="button" class="booking-remove" data-edit-service="${selectedServices.indexOf(item)}">Edit</button></div>`; }).join("");
+        const rows = selectedServices.map(item => { const start = cursor.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" }); cursor = new Date(cursor.getTime() + Number(item.duration) * 60000); const end = cursor.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" }); return `<div class="booking-summary-row"><span>${item.service_name}<small style="display:block;color:var(--text-muted);">${item.barber_name} · ${start}–${end} · ${durationText(item.duration)}</small></span><button type="button" class="booking-remove" data-edit-service="${selectedServices.indexOf(item)}">Edit</button></div>`; }).join("");
         const totalDuration = selectedServices.reduce((sum, item) => sum + Number(item.duration), 0);
-        const totalPrice = selectedServices.reduce((sum, item) => sum + Number(item.price), 0);
-        finalSummary.innerHTML = `<div class="booking-summary-row"><span>Date</span><strong>${new Date(`${dateInput.value}T00:00:00`).toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}</strong></div><div class="booking-summary-row"><span>Starting time</span><strong>${document.querySelector(".booking-time.is-selected")?.textContent || "—"}</strong></div>${rows}<div class="booking-summary-row"><span>Total duration</span><strong>${durationText(totalDuration)}</strong></div><div class="booking-summary-row"><span>Total price</span><strong>${money(totalPrice)}</strong></div><div class="booking-summary-row"><span>Customer</span><strong>${document.getElementById("id_customer_name").value || "—"}</strong></div><div class="booking-summary-row"><span>Phone</span><strong>${document.getElementById("id_phone_number").value || "—"}</strong></div>`;
+        finalSummary.innerHTML = `<div class="booking-summary-row"><span>Date</span><strong>${new Date(`${dateInput.value}T00:00:00`).toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}</strong></div><div class="booking-summary-row"><span>Starting time</span><strong>${document.querySelector(".booking-time.is-selected")?.textContent || "—"}</strong></div>${rows}<div class="booking-summary-row"><span>Total duration</span><strong>${durationText(totalDuration)}</strong></div><div class="booking-summary-row"><span>Customer</span><strong>${document.getElementById("id_customer_name").value || "—"}</strong></div><div class="booking-summary-row"><span>Phone</span><strong>${document.getElementById("id_phone_number").value || "—"}</strong></div>`;
         finalSummary.querySelectorAll("[data-edit-service]").forEach(button => button.addEventListener("click", () => { const item = selectedServices[Number(button.dataset.editService)]; pendingService = { ...item }; selectedServices.splice(Number(button.dataset.editService), 1); syncFields(); showStage(1); loadStylists(item.service_id, item.barber_id); }));
     }
     document.querySelectorAll("[data-next]").forEach(button => button.addEventListener("click", () => {
@@ -844,9 +870,8 @@ document.addEventListener("DOMContentLoaded", function () {
         error("payment", payment.files.length ? "" : "Please enter your payment information.", payment);
         return valid;
     }
-    form.addEventListener("submit", event => { syncFields(); if (!selectedServices.length || !dateInput.value || !timeInput.value || !validateDetails()) { event.preventDefault(); return; } const button = form.querySelector("button[type=submit]"); if (button.dataset.submitting === "true") { event.preventDefault(); return; } button.dataset.submitting = "true"; button.classList.add("booking-submit-loading"); button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending your request...'; });
+    form.addEventListener("submit", event => { syncFields(); if (!selectedServices.length || !dateInput.value || !timeInput.value || !validateDetails()) { event.preventDefault(); return; } const button = form.querySelector("button[type=submit]"); if (button.dataset.submitting === "true") { event.preventDefault(); return; } button.dataset.submitting = "true"; button.disabled = true; button.classList.add("booking-submit-loading"); button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Confirming...'; });
     buildDates();
-    if (dateInput.value) loadSlots();
 });
 </script>
 

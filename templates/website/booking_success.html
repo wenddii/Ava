@@ -38,7 +38,7 @@
                         {% for item in booking.appointment_services.all %}
                             <div class="receipt-row">
                                 <span class="receipt-label">Service {{ forloop.counter }}</span>
-                                <span class="receipt-value">{{ item.service.name }} · {{ item.duration }} min · {{ item.price }} ETB</span>
+                                <span class="receipt-value">{{ item.service.name }} · {{ item.duration }} min</span>
                             </div>
                             <div class="receipt-row">
                                 <span class="receipt-label">Dedicated Specialist</span>
@@ -46,8 +46,8 @@
                             </div>
                         {% endfor %}
                         <div class="receipt-row">
-                            <span class="receipt-label">Total</span>
-                            <span class="receipt-value">{{ booking.total_duration }} min · {{ booking.total_price }} ETB</span>
+                            <span class="receipt-label">Total duration</span>
+                            <span class="receipt-value">{{ booking.total_duration }} min</span>
                         </div>
                     {% else %}
                         <div class="receipt-row">
